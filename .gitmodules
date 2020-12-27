@@ -1,0 +1,6 @@
+[submodule "mycroft-core"]
+	path = mycroft-core
+	url = https://github.com/assistent-cat/mycroft-core
+[submodule "hivemind-core"]
+	path = hivemind-core
+	url = https://github.com/assistent-cat/HiveMind-core
