@@ -6,14 +6,17 @@ services:
       context: .
     ports:
       - "8181:8181"
+      - "5678:5678"
     environment:
       PULSE_SERVER: docker.for.mac.localhost
     volumes:
       - ./skills:/opt/mycroft/skills
-      - ./docker-start.sh:/opt/mycroft/docker-start.sh
+      - ./supervisord.conf:/opt/mycroft/supervisord.conf
       - ../../vosk/model:/vosk/model
       - ./mycroft.conf:/root/.mycroft/mycroft.conf
       - ./logs:/var/log/mycroft
       - ~/.config/pulse/cookie:/root/.config/pulse/cookie
-    command: bash ./docker-start.sh
+      - ./backend:/opt/backend
+      - ./hivemind-core/jarbas_hive_mind:/opt/venv/lib/python3.8/site-packages/jarbas_hive_mind
+    command: supervisord -c /opt/mycroft/supervisord.conf
 

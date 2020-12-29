@@ -90,4 +90,6 @@ launch-background bus
 launch-background audio
 launch-background skills
 
+python3 /opt/backend/main.py >> /var/log/mycroft/backend.log 2>&1 &
+
 tail -F /var/log/mycroft/*.log

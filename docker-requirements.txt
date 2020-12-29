@@ -28,3 +28,4 @@ pychromecast==3.2.2
 python-vlc==1.1.2
 pyalsaaudio==0.8.2
 google-api-python-client==1.6.4
+supervisor==4.2.1
