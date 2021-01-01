@@ -1,22 +1,24 @@
 version: "3.7"
 services:
-  mycroft:
-    container_name: mycroft
+  backend:
+    container_name: ona-backend
     build:
       context: .
+      dockerfile: backend/Dockerfile
     ports:
-      - "8181:8181"
       - "5678:5678"
     environment:
       PULSE_SERVER: docker.for.mac.localhost
     volumes:
+      - ~/.config/pulse/cookie:/root/.config/pulse/cookie
       - ./skills:/opt/mycroft/skills
-      - ./supervisord.conf:/opt/mycroft/supervisord.conf
-      - ../../vosk/model:/vosk/model
       - ./mycroft.conf:/root/.mycroft/mycroft.conf
       - ./logs:/var/log/mycroft
-      - ~/.config/pulse/cookie:/root/.config/pulse/cookie
+      - venv:/opt/venv
+      - ./backend/supervisord.conf:/opt/mycroft/supervisord.conf
       - ./backend:/opt/backend
       - ./hivemind-core/jarbas_hive_mind:/opt/venv/lib/python3.8/site-packages/jarbas_hive_mind
     command: supervisord -c /opt/mycroft/supervisord.conf
+volumes:
+  venv:
 

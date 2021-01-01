@@ -1,3 +1,5 @@
 logs/
 skills/
 node_modules/
+.venv
+__pycache__
