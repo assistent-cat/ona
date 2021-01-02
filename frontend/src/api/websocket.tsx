@@ -1,17 +1,32 @@
-import React, { createContext } from "react";
+import React, { createContext, ReactNode } from "react";
+import { useDispatch } from "react-redux";
+
 import { appendChatMessage } from "../chat/chatSlice";
+import { WS_URL } from "../config";
 import { BusMessage } from "./interfaces";
 
 interface WSContext {
-  socket?: WebSocket;
-  sendUtterance?(utterance: string): void;
+  socket: WebSocket;
+  sendUtterance(utterance: string): void;
 }
 
-const WebSocketContext = createContext<WSContext>({});
+const WebSocketContext = createContext<WSContext>({
+  socket: undefined,
+  sendUtterance: undefined,
+});
 
-let socket: WebSocket;
+export { WebSocketContext };
 
-export default ({ children }: any) => {
+interface Props {
+  children: ReactNode | ReactNode[];
+}
+
+const WebSocketProvider = ({ children }: Props) => {
+  let socket: WebSocket;
+  let ws: WSContext;
+
+  const dispatch = useDispatch();
+
   const sendUtterance = (utterance: string) => {
     if (socket) {
       socket.send(
@@ -27,12 +42,8 @@ export default ({ children }: any) => {
     }
   };
 
-  let ws: WSContext = {
-    sendUtterance,
-  };
-
   if (!socket) {
-    socket = new WebSocket("ws://127.0.0.1:5678");
+    socket = new WebSocket(WS_URL);
 
     socket.onopen = () => {
       console.log("Connection opened");
@@ -43,17 +54,24 @@ export default ({ children }: any) => {
       console.log(`message arrived: ${JSON.stringify(data, null, 2)}`);
 
       if (data.msg_type === "speak") {
-        appendChatMessage({
-          message: data.utterance,
-          type: "bot",
-        });
+        dispatch(
+          appendChatMessage({
+            message: data.utterance,
+            type: "bot",
+          })
+        );
       }
     };
 
-    ws.socket = socket;
+    ws = {
+      socket,
+      sendUtterance,
+    };
   }
 
   return (
     <WebSocketContext.Provider value={ws}>{children}</WebSocketContext.Provider>
   );
 };
+
+export default WebSocketProvider;
