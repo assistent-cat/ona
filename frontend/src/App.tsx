@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
 
 import Chat from "./chat/chat";
+import { appendChatMessage } from "./chat/chatSlice";
 
 const user = "unsafe";
 const key = "unsafe";
@@ -19,6 +21,12 @@ let socket: WebSocket;
 
 function App() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const dispatch = useDispatch();
+
+  const setMessage = (message: ChatMessage) => {
+    console.log(message);
+    dispatch(appendChatMessage(message));
+  };
 
   useEffect(() => {
     const authToken = btoa(user + ":" + key);
@@ -35,24 +43,21 @@ function App() {
       console.log(`message arrived: ${JSON.stringify(data, null, 2)}`);
 
       if (data.msg_type === "speak") {
-        appendChatMessage(data.utterance, "bot");
+        setMessage({
+          message: data.utterance,
+          type: "bot",
+        });
       }
     };
   }, []);
 
-  const appendChatMessage = (message: string, type: "human" | "bot") => {
-    setMessages((messages) => [
-      ...messages,
-      {
-        type,
-        message,
-      },
-    ]);
-  };
-
   const onSubmit = (utterance: string) => {
     if (utterance) {
-      appendChatMessage(utterance, "human");
+      console.log(utterance);
+      setMessage({
+        message: utterance,
+        type: "human",
+      });
 
       if (socket) {
         socket.send(
@@ -69,7 +74,7 @@ function App() {
     }
   };
 
-  return <Chat messages={messages} onSubmit={onSubmit} />;
+  return <Chat onSubmit={onSubmit} />;
 }
 
 export default App;

@@ -6,9 +6,34 @@ from jarbas_hive_mind.master import HiveMind, HiveMindProtocol
 from jarbas_hive_mind.database import ClientDatabase
 from ovos_utils.log import LOG
 from ovos_utils.messagebus import Message
+from mycroft.stt import STTFactory
+from mycroft.configuration import Configuration
 
 
 class OnaBackendProtocol(HiveMindProtocol):
+    def onConnect(self, request):
+
+        LOG.info("Client connecting: {0}".format(request.peer))
+
+        ip = request.peer.split(":")[1]
+        context = {"source": self.peer}
+        self.platform = request.headers.get("platform", "unknown")
+
+        self.crypto_key = None
+        # send message to internal mycroft bus
+        data = {"ip": ip, "headers": request.headers}
+
+        self.blacklist = {
+            "messages": [],
+            "skills": [],
+            "intents": []
+        }
+        self.factory.mycroft_send("hive.client.connect", data, context)
+        # return a pair with WS protocol spoken (or None for any) and
+        # custom headers to send in initial WS opening handshake HTTP response
+        headers = {"server": self.platform}
+        return (None, headers)
+
     def onMessage(self, payload, isBinary):
         if isBinary:
             LOG.debug(
@@ -31,7 +56,7 @@ class OnaFactory(HiveMind):
        """
 
         if isBinary:
-            # TODO receive files
+            print(payload)
             pass
         else:
             # Check protocol
@@ -101,7 +126,10 @@ def start_mind(config=None, bus=None):
     # read port and ssl settings
     listener.load_config(config)
 
+    # stt = STTFactory.create()
     print("test")
+    config_core = Configuration.get()
+    print(config_core.get("stt", {}))
 
     factory = OnaFactory(bus=listener.bus, announce=False)
     listener.listen(factory=factory, protocol=OnaBackendProtocol)

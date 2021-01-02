@@ -1,8 +1,12 @@
 import React, { useEffect, useRef } from "react";
+import { useSelector } from "react-redux";
 import styled from "styled-components";
+
+import { RootState } from "../rootReducer";
 
 import ChatBubble from "./chat-bubble";
 import ChatInput from "./chat-input";
+import { ChatMessage } from "./chatSlice";
 
 const ContentWrapper = styled.div`
   display: flex;
@@ -18,15 +22,15 @@ const ChatWrapper = styled.div`
 `;
 
 interface Props {
-  messages: Array<{
-    type: "bot" | "human";
-    message: string;
-  }>;
   onSubmit(utterance: string): void;
 }
 
-const Chat: React.FunctionComponent<Props> = ({ messages, onSubmit }) => {
+const Chat: React.FunctionComponent<Props> = ({ onSubmit }) => {
   const chatRef = useRef<HTMLDivElement>(null);
+
+  const messages = useSelector<RootState, ChatMessage[]>(
+    (state) => state.chat.messages
+  );
 
   useEffect(() => {
     if (chatRef.current) {
