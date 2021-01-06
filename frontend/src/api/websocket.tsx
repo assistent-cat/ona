@@ -21,8 +21,9 @@ interface Props {
   children: ReactNode | ReactNode[];
 }
 
+let socket: WebSocket;
+
 const WebSocketProvider = ({ children }: Props) => {
-  let socket: WebSocket;
   let ws: WSContext;
 
   const dispatch = useDispatch();
@@ -60,14 +61,20 @@ const WebSocketProvider = ({ children }: Props) => {
             type: "bot",
           })
         );
+      } else if (data.msg_type === "recognized") {
+        dispatch(
+          appendChatMessage({
+            message: data.utterance,
+            type: "human",
+          })
+        );
       }
     };
-
-    ws = {
-      socket,
-      sendUtterance,
-    };
   }
+  ws = {
+    socket,
+    sendUtterance,
+  };
 
   return (
     <WebSocketContext.Provider value={ws}>{children}</WebSocketContext.Provider>

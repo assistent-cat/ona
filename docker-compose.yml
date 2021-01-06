@@ -18,6 +18,7 @@ services:
       - ./backend/supervisord.conf:/opt/mycroft/supervisord.conf
       - ./backend:/opt/backend
       - ./hivemind-core/jarbas_hive_mind:/opt/venv/lib/python3.8/site-packages/jarbas_hive_mind
+      - ~/personal/asr/vosk/model:/opt/vosk/model
     command: supervisord -c /opt/mycroft/supervisord.conf
 volumes:
   venv:

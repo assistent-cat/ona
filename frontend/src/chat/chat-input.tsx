@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Input } from "antd";
 import { RightCircleFilled } from "@ant-design/icons";
 import styled from "styled-components";
+import Microphone from "../audio/microphone";
 
 const InputWrapper = styled.div`
   padding: 1rem;
@@ -90,6 +91,7 @@ const ChatInput: React.FunctionComponent<Props> = (props) => {
         onKeyUp={scrollSentMessages}
       />
       <SubmitButton onMouseUp={onSubmit} />
+      <Microphone />
     </InputWrapper>
   );
 };

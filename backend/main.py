@@ -1,4 +1,6 @@
 import json
+import threading
+from queue import Queue
 
 from jarbas_hive_mind import get_listener
 from jarbas_hive_mind.configuration import CONFIGURATION
@@ -8,6 +10,8 @@ from ovos_utils.log import LOG
 from ovos_utils.messagebus import Message
 from mycroft.stt import STTFactory
 from mycroft.configuration import Configuration
+
+from listener import WebsocketAudioListener
 
 
 class OnaBackendProtocol(HiveMindProtocol):
@@ -56,29 +60,22 @@ class OnaFactory(HiveMind):
        """
 
         if isBinary:
-            print(payload)
-            pass
+            audio_queue = self.clients[client.peer].get("audio_queue")
+            if audio_queue:
+                try:
+                    audio_queue.put(payload)
+                except Exception as e:
+                    print(
+                        f"[{threading.currentThread().getName()}] could not put in queue")
+                    print(e)
         else:
-            # Check protocol
             data = json.loads(payload)
             payload = data["payload"]
             msg_type = data["msg_type"]
 
             if msg_type == "recognized_utterance":
                 utterance = payload.get('utterance')
-                bus_message = {
-                    "type": "recognizer_loop:utterance",
-                    "data": {
-                        "utterances": [utterance],
-                        "context": {
-                            "source": "WebChat",
-                            "destination": "HiveMind",
-                            "platform": "JarbasWebchatTerminalV0.1",
-                            "client_name": "ei"
-                        }
-                    },
-                }
-                self.handle_bus_message(bus_message, client)
+                self.emit_utterance_to_bus(client, utterance)
 
     def on_message_from_mycroft(self, message=None):
         # forward internal messages to clients if they are the target
@@ -88,35 +85,111 @@ class OnaFactory(HiveMind):
             message = Message.deserialize(message)
 
         LOG.debug(
-            "Missatge de tipus: {0}".format(message.msg_type))
-        if message.msg_type != "speak":
+            "Missatge de mycroft rebut: {0}".format(message.serialize()))
+
+        message.context = message.context or {}
+        if message.msg_type == "speak":
+            payload = {
+                "msg_type": "speak",
+                "utterance": message.data['utterance']
+            }
+            peers = message.context.get("destination") or []
+        elif message.msg_type == "recognizer_loop:utterance":
+            payload = {
+                "msg_type": "recognized",
+                "utterance": message.data['utterances'][0]
+            }
+            peers = message.context.get("source") or []
+        else:
             return
 
-        if message.msg_type == "complete_intent_failure":
-            message.msg_type = "hive.complete_intent_failure"
-        message.context = message.context or {}
-        LOG.debug(
-            "Missatge de mycroft rebut: {0}".format(message.serialize()))
-        peers = message.context.get("destination") or []
         if not isinstance(peers, list):
             peers = [peers]
         for peer in peers:
             if peer and peer in self.clients:
                 client = self.clients[peer].get("instance")
-                payload = {"msg_type": "speak",
-                           "utterance": message.data['utterance']
-                           }
                 self.interface.send(payload, client)
+
+    def emit_utterance_to_bus(self, client, utterance):
+        bus_message = {
+            "type": "recognizer_loop:utterance",
+            "data": {
+                "utterances": [utterance],
+                "context": {
+                    "source": client.peer,
+                    "destination": ["skills"],
+                    "client_name": "OnaWebInterface"
+                }
+            },
+        }
+        self.handle_bus_message(bus_message, client)
+
+    def register_client(self, client, platform=None):
+        """
+       Add client to list of managed connections.
+       """
+        platform = platform or "unknown"
+        LOG.info("registering client: " + str(client.peer))
+        t, ip, sock = client.peer.split(":")
+        # see if ip address is blacklisted
+        if ip in self.ip_list and self.blacklist:
+            LOG.warning("Blacklisted ip tried to connect: " + ip)
+            self.unregister_client(client, reason="Blacklisted ip")
+            return
+        # see if ip address is whitelisted
+        elif ip not in self.ip_list and not self.blacklist:
+            LOG.warning("Unknown ip tried to connect: " + ip)
+            #  if not whitelisted kick
+            self.unregister_client(client, reason="Unknown ip")
+            return
+
+        print("check if client exists")
+        existing_client = self.clients.get(client.peer)
+        if existing_client:
+            print("client exists")
+            audio_listener = existing_client.get("audio_listener")
+            if audio_listener:
+                print("audio_listener exists")
+                audio_listener.stop()
+
+        audio_queue = Queue()
+        audio_listener = WebsocketAudioListener(
+            self, client, audio_queue)
+        self.clients[client.peer] = {"instance": client,
+                                     "status": "connected",
+                                     "platform": platform,
+                                     "audio_queue": audio_queue,
+                                     "audio_listener": audio_listener}
+        audio_listener.start()
+
+    def unregister_client(self, client, code=3078,
+                          reason="unregister client request"):
+        """
+        Remove client from list of managed connections.
+        """
+
+        LOG.info("deregistering client: " + str(client.peer))
+        if client.peer in self.clients.keys():
+            client_data = self.clients[client.peer] or {}
+            audio_listener = client_data.get("audio_listener")
+            if audio_listener:
+                LOG.info("stopping audio listener")
+                audio_listener.stop()
+            j, ip, sock_num = client.peer.split(":")
+            context = {"user": client_data.get("names", ["unknown_user"])[0],
+                       "source": client.peer}
+            self.bus.emit(
+                Message("hive.client.disconnect",
+                        {"reason": reason, "ip": ip, "sock": sock_num},
+                        context))
+            client.sendClose(code, reason)
+            self.clients.pop(client.peer)
 
 
 def start_mind(config=None, bus=None):
 
     config = config or CONFIGURATION
 
-    with ClientDatabase() as db:
-        db.add_client('unsafe', 'ciaran@oreilly.cat',
-                      'unsafe', crypto_key=None)
-        print(f"Total clients: {db.total_clients}")
     # listen
     listener = get_listener(bus=bus)
 
@@ -126,8 +199,6 @@ def start_mind(config=None, bus=None):
     # read port and ssl settings
     listener.load_config(config)
 
-    # stt = STTFactory.create()
-    print("test")
     config_core = Configuration.get()
     print(config_core.get("stt", {}))
 

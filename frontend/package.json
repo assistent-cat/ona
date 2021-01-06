@@ -12,6 +12,7 @@
     "@types/react": "^16.14.2",
     "@types/react-dom": "^16.9.10",
     "antd": "^4.9.4",
+    "microphone-stream": "^5.1.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-redux": "^7.2.2",
@@ -50,6 +51,7 @@
   },
   "devDependencies": {
     "@types/react-redux": "^7.1.15",
+    "@types/readable-stream": "^2.3.9",
     "@types/styled-components": "^5.1.7",
     "@types/ws": "^7.4.0",
     "prettier": "2.2.1"
