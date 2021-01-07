@@ -4,3 +4,6 @@
 [submodule "mycroft-catala"]
 	path = mycroft-catala
 	url = https://github.com/assistent-cat/mycroft-docker-catala
+[submodule "catotron-cpu"]
+	path = catotron-cpu
+	url = git@github-privat:assistent-cat/catotron-cpu.git
