@@ -18,11 +18,12 @@ const WebSocketContext = createContext<WSContext>({
 export { WebSocketContext };
 
 const getAudioContext = () => {
-  AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-  const audioContext = new AudioContext({ sampleRate: 22050 });
-  const analyser = audioContext.createAnalyser();
+  const CrossAudioContext =
+    window.AudioContext || (window as any).webkitAudioContext;
+  const audioContext = new CrossAudioContext({ sampleRate: 22050 });
+  // const analyser = audioContext.createAnalyser();
 
-  return { audioContext, analyser };
+  return { audioContext };
 };
 interface Props {
   children: ReactNode | ReactNode[];
@@ -34,7 +35,7 @@ const WebSocketProvider = ({ children }: Props) => {
   let ws: WSContext;
 
   const dispatch = useDispatch();
-  const { audioContext, analyser } = getAudioContext();
+  const { audioContext } = getAudioContext();
   let nextStartTime = audioContext.currentTime;
   let source: AudioBufferSourceNode;
 
