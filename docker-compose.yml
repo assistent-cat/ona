@@ -17,9 +17,20 @@ services:
       - venv:/opt/venv
       - ./backend/supervisord.conf:/opt/mycroft/supervisord.conf
       - ./backend:/opt/backend
+      - ./audios:/opt/audios
+      - ./spoken:/tmp/catotron
       - ./hivemind-core/jarbas_hive_mind:/opt/venv/lib/python3.8/site-packages/jarbas_hive_mind
+      - ../jarbas-stt-plugin-vosk/jarbas_stt_plugin_vosk:/opt/venv/lib/python3.8/site-packages/jarbas_stt_plugin_vosk
       - ~/personal/asr/vosk/model:/opt/vosk/model
     command: supervisord -c /opt/mycroft/supervisord.conf
+  catotron:
+    container_name: ona-catotron
+    build:
+      context: ./catotron-cpu
+      dockerfile: Dockerfile
+    ports:
+      - "9000:9000"
+    entrypoint: python server.py
 volumes:
   venv:
 

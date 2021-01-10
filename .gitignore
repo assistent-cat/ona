@@ -3,3 +3,5 @@ skills/
 node_modules/
 .venv
 __pycache__
+audios
+spoken

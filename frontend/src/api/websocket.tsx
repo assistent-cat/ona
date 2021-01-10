@@ -17,6 +17,13 @@ const WebSocketContext = createContext<WSContext>({
 
 export { WebSocketContext };
 
+const getAudioContext = () => {
+  AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+  const audioContext = new AudioContext({ sampleRate: 22050 });
+  const analyser = audioContext.createAnalyser();
+
+  return { audioContext, analyser };
+};
 interface Props {
   children: ReactNode | ReactNode[];
 }
@@ -27,6 +34,9 @@ const WebSocketProvider = ({ children }: Props) => {
   let ws: WSContext;
 
   const dispatch = useDispatch();
+  const { audioContext, analyser } = getAudioContext();
+  let nextStartTime = audioContext.currentTime;
+  let source: AudioBufferSourceNode;
 
   const sendUtterance = (utterance: string) => {
     if (socket) {
@@ -50,24 +60,39 @@ const WebSocketProvider = ({ children }: Props) => {
       console.log("Connection opened");
     };
 
-    socket.onmessage = (message: MessageEvent<string>) => {
-      const data: BusMessage = JSON.parse(message.data);
-      console.log(`message arrived: ${JSON.stringify(data, null, 2)}`);
+    socket.onmessage = async (message: MessageEvent<string | any>) => {
+      if (typeof message.data === "string") {
+        const data: BusMessage = JSON.parse(message.data);
+        console.log(`message arrived: ${JSON.stringify(data, null, 2)}`);
 
-      if (data.msg_type === "speak") {
-        dispatch(
-          appendChatMessage({
-            message: data.utterance,
-            type: "bot",
-          })
-        );
-      } else if (data.msg_type === "recognized") {
-        dispatch(
-          appendChatMessage({
-            message: data.utterance,
-            type: "human",
-          })
-        );
+        if (data.msg_type === "speak") {
+          dispatch(
+            appendChatMessage({
+              message: data.utterance,
+              type: "bot",
+            })
+          );
+        } else if (data.msg_type === "recognized") {
+          dispatch(
+            appendChatMessage({
+              message: data.utterance,
+              type: "human",
+            })
+          );
+        }
+      } else if (message.data instanceof Blob) {
+        const audioData = message.data;
+        const arrayBuffer = await audioData.arrayBuffer();
+        if (arrayBuffer && arrayBuffer.byteLength > 0) {
+          console.log(nextStartTime);
+          source = audioContext.createBufferSource();
+          const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+          source.buffer = audioBuffer;
+          source.connect(audioContext.destination);
+          source.start(nextStartTime);
+          nextStartTime += audioBuffer.duration;
+          console.log(nextStartTime);
+        }
       }
     };
   }

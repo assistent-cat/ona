@@ -12,6 +12,7 @@ from mycroft.stt import STTFactory
 from mycroft.configuration import Configuration
 
 from listener import WebsocketAudioListener
+from speaker import WebsocketAudioSource
 
 
 class OnaBackendProtocol(HiveMindProtocol):
@@ -51,6 +52,12 @@ class OnaBackendProtocol(HiveMindProtocol):
 
 
 class OnaFactory(HiveMind):
+    def __init__(self, bus=None, announce=True, *args, **kwargs):
+        super(OnaFactory, self).__init__(*args, **kwargs)
+        self.audio_source_queue = Queue()
+        self.audio_source = WebsocketAudioSource(self.audio_source_queue)
+        self.audio_source.start()
+
     def register_mycroft_messages(self):
         self.bus.on("message", self.on_message_from_mycroft)
 
@@ -93,22 +100,23 @@ class OnaFactory(HiveMind):
                 "msg_type": "speak",
                 "utterance": message.data['utterance']
             }
-            peers = message.context.get("destination") or []
-        elif message.msg_type == "recognizer_loop:utterance":
+        elif message.msg_type == "ona:recognized":
             payload = {
                 "msg_type": "recognized",
-                "utterance": message.data['utterances'][0]
+                "utterance": message.data['utterance']
             }
-            peers = message.context.get("source") or []
         else:
             return
 
+        peers = message.context.get("destination") or []
         if not isinstance(peers, list):
             peers = [peers]
         for peer in peers:
             if peer and peer in self.clients:
                 client = self.clients[peer].get("instance")
                 self.interface.send(payload, client)
+                if payload["msg_type"] == "speak":
+                    self.audio_source_queue.put((payload["utterance"], client))
 
     def emit_utterance_to_bus(self, client, utterance):
         bus_message = {
@@ -118,6 +126,20 @@ class OnaFactory(HiveMind):
                 "context": {
                     "source": client.peer,
                     "destination": ["skills"],
+                    "client_name": "OnaWebInterface"
+                }
+            },
+        }
+        self.handle_bus_message(bus_message, client)
+
+    def emit_utterance_to_ona_via_bus(self, client, utterance):
+        bus_message = {
+            "type": "ona:recognized",
+            "data": {
+                "utterance": utterance,
+                "context": {
+                    "source": "ona-listener",
+                    "destination": client.peer,
                     "client_name": "OnaWebInterface"
                 }
             },
@@ -142,15 +164,6 @@ class OnaFactory(HiveMind):
             #  if not whitelisted kick
             self.unregister_client(client, reason="Unknown ip")
             return
-
-        print("check if client exists")
-        existing_client = self.clients.get(client.peer)
-        if existing_client:
-            print("client exists")
-            audio_listener = existing_client.get("audio_listener")
-            if audio_listener:
-                print("audio_listener exists")
-                audio_listener.stop()
 
         audio_queue = Queue()
         audio_listener = WebsocketAudioListener(
