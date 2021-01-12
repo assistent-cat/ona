@@ -1,0 +1,20 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: ona-ingress
+spec:
+  tls:
+    - hosts:
+      - ona.assistent.cat
+      secretName: ona-certificate
+  rules:
+  - http:
+      paths:
+      - path: /
+        backend:
+          serviceName: ona-frontend
+          servicePort: 80
+      - path: /ws
+        backend:
+          serviceName: ona-backend
+          servicePort: 5678

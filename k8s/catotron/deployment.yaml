@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ona-catotron
+  labels:
+    app: ona-catotron
+    tier: backend
+spec:
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: ona-catotron
+      tier: backend
+  template:
+    metadata:
+      labels:
+        app: ona-catotron
+        tier: backend
+    spec:
+      containers:
+        - name: ona-catotron
+          image: assistent/catotron-cpu:latest
+          command: ["python", "server.py"]
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 9000
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 9000
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
+            periodSeconds: 30
+          resources:
+            requests:
+              memory: 512Mi
+              cpu: 100m
+            limits:
+              memory: 1024Mi
+              cpu: 200m
+          ports:
+            - containerPort: 9000
+              protocol: TCP
+              name: http

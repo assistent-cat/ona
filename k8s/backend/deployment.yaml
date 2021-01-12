@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ona-backend
+  labels:
+    app: ona-backend
+    tier: backend
+spec:
+  replicas: 1
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: ona-backend
+      tier: backend
+  template:
+    metadata:
+      labels:
+        app: ona-backend
+        tier: backend
+    spec:
+      containers:
+        - name: ona-backend
+          image: ona-backend:0.0.1
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 5678
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 5678
+            initialDelaySeconds: 5
+            timeoutSeconds: 1
+            periodSeconds: 30
+          resources:
+            requests:
+              memory: 128Mi
+              cpu: 100m
+            limits:
+              memory: 256Mi
+              cpu: 200m
+          ports:
+            - containerPort: 5678
+              protocol: TCP
+              name: http

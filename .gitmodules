@@ -7,3 +7,6 @@
 [submodule "catotron-cpu"]
 	path = catotron-cpu
 	url = git@github-privat:assistent-cat/catotron-cpu.git
+[submodule "vosk-server"]
+	path = vosk-server
+	url = https://github.com/ccoreilly/vosk-server.git

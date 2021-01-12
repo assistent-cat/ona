@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: ona.assistent.cat
+spec:
+  secretName: ona-certificate
+  commonName: ona.assistent.cat
+  dnsNames:
+  - ona.assistent.cat
+  issuerRef:
+    name: letsencrypt
+    kind: Issuer
