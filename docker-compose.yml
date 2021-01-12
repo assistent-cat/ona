@@ -3,25 +3,16 @@ services:
   backend:
     container_name: ona-backend
     build:
-      context: .
-      dockerfile: backend/Dockerfile
+      context: ./backend
+      dockerfile: Dockerfile
     ports:
       - "5678:5678"
-    environment:
-      PULSE_SERVER: docker.for.mac.localhost
     volumes:
-      - ~/.config/pulse/cookie:/root/.config/pulse/cookie
       - ./skills:/opt/mycroft/skills
-      - ./mycroft.conf:/root/.mycroft/mycroft.conf
       - ./logs:/var/log/mycroft
-      - venv:/opt/venv
-      - ./backend/supervisord.conf:/opt/mycroft/supervisord.conf
       - ./backend:/opt/backend
-      - ./audios:/opt/audios
-      - ./spoken:/tmp/catotron
-      - ./hivemind-core/jarbas_hive_mind:/opt/venv/lib/python3.8/site-packages/jarbas_hive_mind
-      - ../jarbas-stt-plugin-vosk/jarbas_stt_plugin_vosk:/opt/venv/lib/python3.8/site-packages/jarbas_stt_plugin_vosk
-      - ~/personal/asr/vosk/model:/opt/vosk/model
+      - venv:/opt/venv
+      - catroton-cache:/tmp/catotron
     command: supervisord -c /opt/mycroft/supervisord.conf
   catotron:
     container_name: ona-catotron
