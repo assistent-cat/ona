@@ -1,15 +1,23 @@
 FROM mycroft-catala:latest
 
-COPY ./hivemind-core/setup.py /opt/hivemind/setup.py
-COPY ./hivemind-core/jarbas_hive_mind /opt/hivemind/jarbas_hive_mind
+RUN addgroup --gid 1001 --system ona && \
+    adduser --system --uid 1001 --gid 1001 ona && \
+    chown -R ona:ona /opt && \
+    chown -R ona:ona /var/log/mycroft
 
-RUN pip install --no-cache-dir /opt/hivemind
-RUN which python
-ENV PATH="/opt/venv/bin:$PATH"
-RUN which python
+USER ona
+WORKDIR /opt/backend
 
-RUN pip install --no-cache-dir git+http://github.com/JarbasLingua/jarbas-stt-plugin-vosk.git
-RUN pip install --no-cache-dir git+https://github.com/JarbasLingua/jarbas-tts-plugin-catotron.git
+COPY --chown=ona ./requirements.txt ./requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-COPY ./backend/requirements.txt /opt/backend/requirements.txt
-RUN pip install --no-cache-dir -r /opt/backend/requirements.txt
+COPY --chown=ona ./main.py ./main.py
+COPY --chown=ona ./listener.py ./listener.py
+COPY --chown=ona ./speaker.py ./speaker.py
+COPY --chown=ona ./supervisord.conf /opt/mycroft/supervisord.conf
+COPY --chown=ona ./mycroft.conf /home/ona/.mycroft/mycroft.conf
+
+EXPOSE 5678
+
+WORKDIR /opt/mycroft
+ENTRYPOINT [ "supervisord", "-c", "/opt/mycroft/supervisord.conf" ]

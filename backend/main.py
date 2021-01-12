@@ -212,9 +212,6 @@ def start_mind(config=None, bus=None):
     # read port and ssl settings
     listener.load_config(config)
 
-    config_core = Configuration.get()
-    print(config_core.get("stt", {}))
-
     factory = OnaFactory(bus=listener.bus, announce=False)
     listener.listen(factory=factory, protocol=OnaBackendProtocol)
 
