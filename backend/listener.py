@@ -4,17 +4,20 @@ from collections import deque
 from queue import Queue, Empty
 from threading import Thread
 
-from mycroft.stt import STTFactory
+import grpc
+import stt_service_pb2
+import stt_service_pb2_grpc
 
 vad = webrtcvad.Vad(3)
-
+vosk_server_host = os.getenv('VOSK_SERVER_HOST') or 'localhost'
+vosk_server_port = os.getenv('VOSK_SERVER_PORT') or 5001
+channel = grpc.insecure_channel(f"{vosk_server_host}:{vosk_server_port}")
 
 class WebsocketAudioListener(Thread):
     def __init__(self, factory, client, queue, sample_rate=16000):
         super(WebsocketAudioListener, self).__init__()
         self.client = client
         self.factory = factory
-        self.stt = STTFactory.create()
         self.sample_rate = sample_rate
         self.vad = webrtcvad.Vad(1)
         self.queue = queue
@@ -33,6 +36,24 @@ class WebsocketAudioListener(Thread):
         self.running = True
 
     def run(self):
+        while self.keep_running():
+            stub = stt_service_pb2_grpc.SttServiceStub(channel)
+            results = stub.StreamingRecognize(self.vad_generator())
+            try:
+                for r in results:
+                    try:
+                        if r.chunks[0].final:
+                            self.emit_utterance(r.chunks[0].alternatives[0].text)
+                            break
+                    except LookupError:
+                        print('No available chunks')
+            except grpc._channel._Rendezvous as err:
+                print('Error code %s, message: %s' % (err._state.code, err._state.details))
+        
+    def keep_running(self):
+        return self.running and self.factory.clients.get(self.client.peer)
+
+    def queue_generator(self):
         audio_data = bytearray()
         while self.keep_running():
             if len(audio_data) < self.block_size:
@@ -44,46 +65,48 @@ class WebsocketAudioListener(Thread):
             else:
                 audio_block = audio_data[: self.block_size]
                 audio_data = audio_data[self.block_size:]
-                self.process_audio(audio_block)
+                yield audio_block
+
+    def vad_generator(self):
+        specification = stt_service_pb2.RecognitionSpec(
+            partial_results=True,
+            audio_encoding='LINEAR16_PCM',
+            sample_rate_hertz=self.sample_rate
+        )
         
-        self.stop()
+        streaming_config = stt_service_pb2.RecognitionConfig(specification=specification)
 
-    def keep_running(self):
-        return self.running and self.factory.clients.get(self.client.peer)
+        yield stt_service_pb2.StreamingRecognitionRequest(config=streaming_config)
+        
+        for audio_block in self.queue_generator():
+            try:
+                is_speech = self.vad.is_speech(audio_block, self.sample_rate)
+            except:
+                is_speech = False
 
-    def process_audio(self, audio_block):
-        try:
-            is_speech = self.vad.is_speech(audio_block, self.sample_rate)
-        except:
-            is_speech = False
-
-        if not self.triggered:
-            self.ring_buffer.append((audio_block, is_speech))
-            num_voiced = len(
-                [f for f, speech in self.ring_buffer if speech])
-            if num_voiced > self.ratio * self.ring_buffer.maxlen:
-                self.triggered = True
-                self.stt.stream_start()
-                for f, s in self.ring_buffer:
-                    self.stt.stream_data(f)
-                self.ring_buffer.clear()
-        else:
-            self.stt.stream_data(audio_block)
-            self.ring_buffer.append((audio_block, is_speech))
-            num_unvoiced = len(
-                [f for f, speech in self.ring_buffer if not speech])
-            if num_unvoiced > self.ratio * self.ring_buffer.maxlen:
-                self.triggered = False
-                text = self.stt.stream_stop()
-                self.ring_buffer.clear()
-                if text:
-                    self.emit_utterance(text)
+            if not self.triggered:
+                self.ring_buffer.append((audio_block, is_speech))
+                num_voiced = len(
+                    [f for f, speech in self.ring_buffer if speech])
+                if num_voiced > self.ratio * self.ring_buffer.maxlen:
+                    self.triggered = True
+                    for f, s in self.ring_buffer:
+                        yield stt_service_pb2.StreamingRecognitionRequest(audio_content=bytes(f))
+                    self.ring_buffer.clear()
+            else:
+                yield stt_service_pb2.StreamingRecognitionRequest(audio_content=bytes(audio_block))
+                self.ring_buffer.append((audio_block, is_speech))
+                num_unvoiced = len(
+                    [f for f, speech in self.ring_buffer if not speech])
+                if num_unvoiced > self.ratio * self.ring_buffer.maxlen:
+                    self.triggered = False
+                    self.ring_buffer.clear()
+                    break
 
     def emit_utterance(self, utterance):
         if len(utterance) > 0:
             self.factory.emit_utterance_to_bus(self.client, utterance)
-            self.factory.emit_utterance_to_ona_via_bus(self.client, utterance)
+            self.factory.emit_utterance_to_ona(self.client, utterance)
 
     def stop(self):
-        self.stt.stream_stop()
         self.running = False

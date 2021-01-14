@@ -7,6 +7,7 @@ services:
       dockerfile: Dockerfile
     ports:
       - "5678:5678"
+    user: ona
     environment:
       VOSK_SERVER_HOST: vosk
     volumes:
@@ -24,11 +25,11 @@ services:
     entrypoint: python server.py
   vosk:
     container_name: ona-vosk
-    image: assistent/kaldi-catala:0.0.1
+    image: assistent/kaldi-catala:0.0.2
     environment:
       VOSK_SAMPLE_RATE: 16000
     ports:
-      - "2700:2700"
+      - "5001:5001"
     volumes:
       - ./vosk-server:/opt/vosk-server
 volumes:

@@ -117,32 +117,30 @@ class OnaFactory(HiveMind):
                     self.audio_source_queue.put((payload["utterance"], client))
 
     def emit_utterance_to_bus(self, client, utterance):
-        bus_message = {
-            "type": "recognizer_loop:utterance",
-            "data": {
-                "utterances": [utterance],
-                "context": {
-                    "source": client.peer,
-                    "destination": ["skills"],
-                    "client_name": "OnaWebInterface"
-                }
-            },
+        msg_type = "recognizer_loop:utterance"
+        data = {
+            "utterances": [utterance]
         }
+        context = {
+            "source": client.peer,
+            "destination": ["skills"],
+            "client_name": "OnaWebInterface"
+        }
+        message = Message(msg_type, data, context)
         self.handle_bus_message(bus_message, client)
 
-    def emit_utterance_to_ona_via_bus(self, client, utterance):
-        bus_message = {
-            "type": "ona:recognized",
-            "data": {
-                "utterance": utterance,
-                "context": {
-                    "source": "ona-listener",
-                    "destination": client.peer,
-                    "client_name": "OnaWebInterface"
-                }
-            },
+    def emit_utterance_to_ona(self, client, utterance):
+        msg_type = "ona:recognized"
+        data = {
+            "utterance": utterance
         }
-        self.handle_bus_message(bus_message, client)
+        context = {
+            "source": "ona-listener",
+            "destination": client.peer,
+            "client_name": "OnaWebInterface"
+        }
+        message = Message(msg_type, data, context)
+        self.on_message_from_mycroft(message)
 
     def register_client(self, client, platform=None):
         """
