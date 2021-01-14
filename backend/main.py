@@ -8,8 +8,6 @@ from jarbas_hive_mind.master import HiveMind, HiveMindProtocol
 from jarbas_hive_mind.database import ClientDatabase
 from ovos_utils.log import LOG
 from ovos_utils.messagebus import Message
-from mycroft.stt import STTFactory
-from mycroft.configuration import Configuration
 
 from listener import WebsocketAudioListener
 from speaker import WebsocketAudioSource
@@ -174,29 +172,6 @@ class OnaFactory(HiveMind):
                                      "audio_queue": audio_queue,
                                      "audio_listener": audio_listener}
         audio_listener.start()
-
-    def unregister_client(self, client, code=3078,
-                          reason="unregister client request"):
-        """
-        Remove client from list of managed connections.
-        """
-
-        LOG.info("deregistering client: " + str(client.peer))
-        if client.peer in self.clients.keys():
-            client_data = self.clients[client.peer] or {}
-            audio_listener = client_data.get("audio_listener")
-            if audio_listener:
-                LOG.info("stopping audio listener")
-                audio_listener.stop()
-            j, ip, sock_num = client.peer.split(":")
-            context = {"user": client_data.get("names", ["unknown_user"])[0],
-                       "source": client.peer}
-            self.bus.emit(
-                Message("hive.client.disconnect",
-                        {"reason": reason, "ip": ip, "sock": sock_num},
-                        context))
-            client.sendClose(code, reason)
-            self.clients.pop(client.peer)
 
 
 def start_mind(config=None, bus=None):

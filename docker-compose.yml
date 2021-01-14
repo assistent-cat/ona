@@ -7,21 +7,29 @@ services:
       dockerfile: Dockerfile
     ports:
       - "5678:5678"
+    environment:
+      VOSK_SERVER_HOST: vosk
     volumes:
       - ./skills:/opt/mycroft/skills
       - ./logs:/var/log/mycroft
       - ./backend:/opt/backend
+      - ./backend/supervisord-dev.conf:/opt/mycroft/supervisord.conf
       - venv:/opt/venv
-      - catroton-cache:/tmp/catotron
-    command: supervisord -c /opt/mycroft/supervisord.conf
+      - ./spoken:/tmp/catotron
   catotron:
     container_name: ona-catotron
-    build:
-      context: ./catotron-cpu
-      dockerfile: Dockerfile
+    image: assistent/catotron-cpu:latest
     ports:
       - "9000:9000"
     entrypoint: python server.py
+  vosk:
+    container_name: ona-vosk
+    image: assistent/kaldi-catala:0.0.1
+    environment:
+      VOSK_SAMPLE_RATE: 16000
+    ports:
+      - "2700:2700"
+    volumes:
+      - ./vosk-server:/opt/vosk-server
 volumes:
   venv:
-

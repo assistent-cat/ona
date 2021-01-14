@@ -8,7 +8,7 @@ declare module window {
 }
 
 export const WS_HOST = window?.envConfig?.BACKEND_HOST || "127.0.0.1";
-export const WS_PORT = window?.envConfig?.BACKEND_PORT || "80";
+export const WS_PORT = window?.envConfig?.BACKEND_PORT || "5678";
 export const WS_PATH = window?.envConfig?.BACKEND_PATH || "";
 export const WS_URL = `${
   window?.envConfig?.USE_SSL ? "wss" : "ws"
