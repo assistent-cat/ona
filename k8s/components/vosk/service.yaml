@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ona-vosk
+spec:
+  clusterIP: None
+  ports:
+  - port: 2700
+    protocol: TCP
+    targetPort: 2700
+  selector:
+    app: ona-vosk
+  sessionAffinity: None
+  type: ClusterIP

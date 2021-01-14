@@ -1,4 +1,4 @@
-FROM mycroft-catala:latest
+FROM assistent/mycroft-catala:latest
 
 RUN addgroup --gid 1001 --system ona && \
     adduser --system --uid 1001 --gid 1001 ona && \
