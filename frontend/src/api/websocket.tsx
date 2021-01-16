@@ -1,5 +1,6 @@
-import React, { createContext, ReactNode } from "react";
+import React, { createContext, ReactNode, useContext } from "react";
 import { useDispatch } from "react-redux";
+import { AudioPlayerContext } from "../audio/player";
 
 import { appendChatMessage } from "../chat/chatSlice";
 import { WS_URL } from "../config";
@@ -16,15 +17,6 @@ const WebSocketContext = createContext<WSContext>({
 });
 
 export { WebSocketContext };
-
-const getAudioContext = () => {
-  const CrossAudioContext =
-    window.AudioContext || (window as any).webkitAudioContext;
-  const audioContext = new CrossAudioContext({ sampleRate: 22050 });
-  // const analyser = audioContext.createAnalyser();
-
-  return { audioContext };
-};
 interface Props {
   children: ReactNode | ReactNode[];
 }
@@ -35,12 +27,10 @@ const WebSocketProvider = ({ children }: Props) => {
   let ws: WSContext;
 
   const dispatch = useDispatch();
-  const { audioContext } = getAudioContext();
-  let nextStartTime = audioContext.currentTime;
-  let source: AudioBufferSourceNode;
+  const player = useContext(AudioPlayerContext);
 
   const sendUtterance = (utterance: string) => {
-    if (socket) {
+    if (socket && socket.readyState === 1) {
       socket.send(
         JSON.stringify({
           msg_type: "recognized_utterance",
@@ -50,21 +40,30 @@ const WebSocketProvider = ({ children }: Props) => {
         })
       );
     } else {
-      console.log("no socket");
+      console.log("trying to reconnect");
+      init();
+      sendUtterance(utterance);
     }
   };
 
-  if (!socket) {
+  const init = () => {
     socket = new WebSocket(WS_URL);
 
     socket.onopen = () => {
       console.log("Connection opened");
     };
 
+    socket.onclose = () => {
+      console.log("Connection closed");
+      socket = undefined;
+    };
+
     socket.onmessage = async (message: MessageEvent<string | any>) => {
       if (typeof message.data === "string") {
         const data: BusMessage = JSON.parse(message.data);
-        console.log(`message arrived: ${JSON.stringify(data, null, 2)}`);
+        if (process.env.NODE_ENV === "development") {
+          console.log(`message arrived: ${JSON.stringify(data, null, 2)}`);
+        }
 
         if (data.msg_type === "speak") {
           dispatch(
@@ -83,20 +82,15 @@ const WebSocketProvider = ({ children }: Props) => {
         }
       } else if (message.data instanceof Blob) {
         const audioData = message.data;
-        const arrayBuffer = await audioData.arrayBuffer();
-        if (arrayBuffer && arrayBuffer.byteLength > 0) {
-          console.log(nextStartTime);
-          source = audioContext.createBufferSource();
-          const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-          source.buffer = audioBuffer;
-          source.connect(audioContext.destination);
-          source.start(nextStartTime);
-          nextStartTime += audioBuffer.duration;
-          console.log(nextStartTime);
-        }
+        await player.speak(audioData);
       }
     };
+  };
+
+  if (!socket) {
+    init();
   }
+
   ws = {
     socket,
     sendUtterance,

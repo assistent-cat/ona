@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react";
-import { AudioOutlined } from "@ant-design/icons";
+import { AudioMutedOutlined, AudioOutlined } from "@ant-design/icons";
 
 import MicrophoneStream from "microphone-stream";
 import L16 from "watson-speech/speech-to-text/webaudio-l16-stream";
@@ -9,8 +9,19 @@ import { WebSocketContext } from "../api/websocket";
 import { AudioStreamer } from "./audiostreamer";
 import { AudioBucket } from "./audiobucket";
 
-const MicButton = styled(AudioOutlined)`
-  color: ${({ muted }) => (muted ? "lightgray" : "#6a96ff")};
+const MicButtonOn = styled(AudioOutlined)`
+  color: #6a96ff;
+  box-sizing: border-box;
+  padding: 0.2rem 0 0.2rem 0.5rem;
+  > svg {
+    height: 3rem;
+    width: 3rem;
+  }
+  cursor: pointer;
+`;
+
+const MicButtonOff = styled(AudioMutedOutlined)`
+  color: lightgray;
   box-sizing: border-box;
   padding: 0.2rem 0 0.2rem 0.5rem;
   > svg {
@@ -36,28 +47,30 @@ const Microphone: React.FunctionComponent<Props> = () => {
         bufferSize: 1024,
       });
 
-      // (micStream as any).on("data", console.log);
       let mediaStream = null;
       try {
         mediaStream = await navigator.mediaDevices.getUserMedia({
           video: false,
-          audio: true,
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            sampleRate: 16000,
+          },
         });
+        micStream.setStream(mediaStream);
       } catch (err) {
         console.log(err);
       }
-      micStream.setStream(mediaStream);
     } else {
       (micStream as any).unpipe(AudioBucket);
     }
 
     l16Stream = new L16({ writableObjectMode: true });
-    (l16Stream as any).on("format", console.log);
     micStream.pipe(l16Stream).pipe(audioStreamer);
   };
 
   const toggleMic = () => {
-    if (ws?.socket) {
+    if (ws?.socket && ws.socket.readyState === 1) {
       if (muted) {
         startRecognitionStream();
       } else {
@@ -67,7 +80,11 @@ const Microphone: React.FunctionComponent<Props> = () => {
       setMuted((muted) => !muted);
     }
   };
-  return <MicButton muted={muted} onMouseUp={toggleMic} />;
+  return muted ? (
+    <MicButtonOff onMouseUp={toggleMic} />
+  ) : (
+    <MicButtonOn onMouseUp={toggleMic} />
+  );
 };
 
 export default Microphone;

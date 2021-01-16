@@ -18,3 +18,7 @@ code {
   height: 100%;
   margin: 0;
 }
+
+.hidden-audio {
+  display: none;
+}
