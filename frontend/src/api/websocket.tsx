@@ -40,9 +40,9 @@ const WebSocketProvider = ({ children }: Props) => {
         })
       );
     } else {
+      // TODO: some sort of ws connection watcher instead of this
       console.log("trying to reconnect");
       init();
-      sendUtterance(utterance);
     }
   };
 

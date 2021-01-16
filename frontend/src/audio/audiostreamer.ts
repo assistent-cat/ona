@@ -6,8 +6,12 @@ export class AudioStreamer extends Duplex {
   }
 
   public _write(chunk: any, encoding: any, callback: any) {
-    this.socket.send(chunk);
-    this.afterSend(callback);
+    if (this.socket && this.socket.readyState === 1) {
+      this.socket.send(chunk);
+      this.afterSend(callback);
+    } else {
+      callback();
+    }
   }
 
   private afterSend(next: any) {
