@@ -103,6 +103,11 @@ class OnaFactory(HiveMind):
                 "msg_type": "recognized",
                 "utterance": message.data['utterance']
             }
+        elif message.msg_type == "play:status":
+            payload = {
+                "msg_type": "play",
+                "data": message.data
+            }
         else:
             return
 
@@ -117,16 +122,17 @@ class OnaFactory(HiveMind):
                     self.audio_source_queue.put((payload["utterance"], client))
 
     def emit_utterance_to_bus(self, client, utterance):
-        msg_type = "recognizer_loop:utterance"
-        data = {
-            "utterances": [utterance]
+        bus_message = {
+            "msg_type": "recognizer_loop:utterance",
+            "data": {
+                "utterances": [utterance]
+            },
+            "context": {
+                "source": client.peer,
+                "destination": ["skills"],
+                "client_name": "OnaWebInterface"
+            }
         }
-        context = {
-            "source": client.peer,
-            "destination": ["skills"],
-            "client_name": "OnaWebInterface"
-        }
-        message = Message(msg_type, data, context)
         self.handle_bus_message(bus_message, client)
 
     def emit_utterance_to_ona(self, client, utterance):

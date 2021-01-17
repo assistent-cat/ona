@@ -17,6 +17,7 @@ services:
       - ./backend/supervisord-dev.conf:/opt/mycroft/supervisord.conf
       - venv:/opt/venv
       - ./spoken:/tmp/catotron
+      - ./mycroft-catala/mycroft-core/mycroft:/opt/mycroft/mycroft
   catotron:
     container_name: ona-catotron
     image: assistent/catotron-cpu:latest
