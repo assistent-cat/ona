@@ -1,12 +1,14 @@
-import React, { useEffect, useRef } from "react";
-import { useSelector } from "react-redux";
+import React, { useContext, useEffect, useRef } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
+import { RightOutlined } from "@ant-design/icons";
 
+import { WebSocketContext } from "../api/websocket";
 import { RootState } from "../rootReducer";
 
 import ChatBubble from "./chat-bubble";
 import ChatInput from "./chat-input";
-import { ChatMessage } from "./chatSlice";
+import { appendChatMessage, ChatMessage, closeSidebar } from "./chatSlice";
 
 const ContentWrapper = styled.div`
   display: flex;
@@ -21,11 +23,41 @@ const ChatWrapper = styled.div`
   flex: 1;
 `;
 
-interface Props {
-  onSubmit(utterance: string): void;
-}
+const ChatHeader = styled.div`
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: row;
+`;
 
-const Chat: React.FunctionComponent<Props> = ({ onSubmit }) => {
+const ChatClose = styled(RightOutlined)`
+  color: lightgray;
+  box-sizing: border-box;
+  > svg {
+    height: 2rem;
+    width: 2rem;
+  }
+  cursor: pointer;
+`;
+
+interface Props {}
+
+const Chat: React.FunctionComponent<Props> = () => {
+  const dispatch = useDispatch();
+  const ws = useContext(WebSocketContext);
+
+  const onSubmit = (utterance: string) => {
+    if (utterance) {
+      dispatch(
+        appendChatMessage({
+          message: utterance,
+          type: "human",
+        })
+      );
+
+      ws.sendUtterance(utterance);
+    }
+  };
+
   const chatRef = useRef<HTMLDivElement>(null);
 
   const messages = useSelector<RootState, ChatMessage[]>(
@@ -40,6 +72,9 @@ const Chat: React.FunctionComponent<Props> = ({ onSubmit }) => {
 
   return (
     <ContentWrapper>
+      <ChatHeader>
+        <ChatClose onMouseUp={(e) => dispatch(closeSidebar())} />
+      </ChatHeader>
       <ChatWrapper ref={chatRef}>
         {messages.map(({ type, message }, index) => {
           return <ChatBubble key={`${index}`} message={message} type={type} />;

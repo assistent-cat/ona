@@ -4,7 +4,8 @@ import styled from "styled-components";
 import ReactPlayer from "react-player";
 
 import { RootState } from "../rootReducer";
-import { MediaState, MediaTrack } from "./mediaSlice";
+import { MediaState } from "./mediaSlice";
+import { getMediaUri } from "./utils";
 
 interface Props {}
 
@@ -18,20 +19,7 @@ const MediaPlayer: React.FunctionComponent<Props> = () => {
     (state) => state.media.media
   );
 
-  const getMediaUri = (tracks: MediaTrack[]): string => {
-    const track = tracks?.[tracks?.length - 1];
-    if (!track) {
-      return null;
-    }
-
-    if (Array.isArray(track.uri)) {
-      return track.uri[0];
-    }
-
-    return track.uri;
-  };
-
-  const mediaUri = getMediaUri(media.tracks);
+  const mediaUri = getMediaUri(media.tracks?.[media.tracks.length - 1]);
   return (
     <ContentWrapper>
       {mediaUri ? (

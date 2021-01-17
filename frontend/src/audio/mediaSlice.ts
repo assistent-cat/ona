@@ -1,4 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { AppThunk } from "../store";
+import { getMediaUri, parsePLS } from "./utils";
 
 export interface MediaTrack {
   skill: string;
@@ -14,6 +16,10 @@ export interface MediaTrack {
 }
 
 export interface MediaState {
+  human: {
+    muted: boolean;
+  };
+
   ona: {
     muted: boolean;
   };
@@ -27,6 +33,9 @@ export interface MediaState {
 }
 
 let initialState: MediaState = {
+  human: {
+    muted: true,
+  },
   ona: {
     muted: false,
   },
@@ -48,13 +57,14 @@ const appendOrMergeTrack = (
   }
 
   const lastTrack = tracks.pop();
-  if (lastTrack.skill !== newTrack.skill || newTrack.uri !== "") {
+  if (lastTrack.skill !== newTrack.skill || (lastTrack.uri && newTrack.uri)) {
     return [...tracks, lastTrack, newTrack];
   }
 
+  const uri = lastTrack.uri === "" ? newTrack.uri : lastTrack.uri;
   const mergedTrack = {
     ...newTrack,
-    uri: lastTrack.uri,
+    uri,
   };
 
   return [...tracks, mergedTrack];
@@ -75,9 +85,62 @@ const mediaSlice = createSlice({
     resetMedia(state) {
       state = initialState;
     },
+    toggleMicrophone(state) {
+      state.human.muted = !state.human.muted;
+    },
   },
 });
 
-export const { appendMediaTrack, resetMedia } = mediaSlice.actions;
+export const {
+  appendMediaTrack,
+  resetMedia,
+  toggleMicrophone,
+} = mediaSlice.actions;
 
 export default mediaSlice.reducer;
+
+export const resolveAndAppendMediaTrack = (
+  track: MediaTrack
+): AppThunk => async (dispatch) => {
+  const uri = getMediaUri(track);
+  console.log(uri);
+  if (uri === "") {
+    dispatch(appendMediaTrack(track));
+    return;
+  }
+  try {
+    const headResponse = await fetch(uri, { method: "HEAD" });
+    const contentType = headResponse.headers.get("content-type");
+
+    if (
+      headResponse.status >= 200 &&
+      headResponse.status < 300 &&
+      contentType !== "audio/x-scpls"
+    ) {
+      dispatch(appendMediaTrack(track));
+      return;
+    }
+
+    const getResponse = await fetch(uri, {
+      method: "GET",
+      mode: "cors",
+    });
+
+    if (getResponse.status >= 200 && getResponse.status < 300) {
+      const pls = await getResponse.text();
+      for (const plsTrack of parsePLS(pls)) {
+        dispatch(
+          appendMediaTrack({
+            ...track,
+            uri: plsTrack.uri,
+            track: plsTrack.title,
+            track_length: plsTrack.length,
+          })
+        );
+      }
+    }
+  } catch (err) {
+    // ignore
+    console.log("error: " + err);
+  }
+};

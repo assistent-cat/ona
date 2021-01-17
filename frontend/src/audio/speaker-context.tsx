@@ -10,7 +10,7 @@ const SpeakerContext = createContext<ISpeakerContext>({
   speak: undefined,
 });
 
-export { SpeakerContext as AudioPlayerContext };
+export { SpeakerContext };
 
 const getAudioContext = () => {
   //   const CrossAudioContext =

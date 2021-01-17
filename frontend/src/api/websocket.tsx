@@ -1,7 +1,7 @@
 import React, { createContext, ReactNode, useContext } from "react";
 import { useDispatch } from "react-redux";
-import { appendMediaTrack } from "../audio/mediaSlice";
-import { AudioPlayerContext } from "../audio/speaker";
+import { resolveAndAppendMediaTrack } from "../audio/mediaSlice";
+import { SpeakerContext } from "../audio/speaker-context";
 
 import { appendChatMessage } from "../chat/chatSlice";
 import { WS_URL } from "../config";
@@ -28,7 +28,7 @@ const WebSocketProvider = ({ children }: Props) => {
   let ws: WSContext;
 
   const dispatch = useDispatch();
-  const player = useContext(AudioPlayerContext);
+  const player = useContext(SpeakerContext);
 
   const sendUtterance = (utterance: string) => {
     if (socket && socket.readyState === 1) {
@@ -84,7 +84,7 @@ const WebSocketProvider = ({ children }: Props) => {
             );
             break;
           case "play":
-            dispatch(appendMediaTrack(data.data));
+            dispatch(resolveAndAppendMediaTrack(data.data));
             break;
           default:
         }

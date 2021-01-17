@@ -9,6 +9,7 @@ declare module "microphone-stream" {
     constructor(options?: Options);
     public setStream(stream: MediaStream): void;
     public pipe<S extends Duplex>(dest: S, pipeOpts?: { end?: boolean }): S;
+    public unpipe<S extends Duplex>(dest: S, pipeOpts?: { end?: boolean }): S;
   }
   export = MicrophoneStream;
 }

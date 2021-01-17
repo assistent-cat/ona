@@ -1,13 +1,15 @@
-import React, { useContext, useState } from "react";
 import { AudioMutedOutlined, AudioOutlined } from "@ant-design/icons";
-
 import MicrophoneStream from "microphone-stream";
-import L16 from "watson-speech/speech-to-text/webaudio-l16-stream";
+import React, { useContext } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
+import L16 from "watson-speech/speech-to-text/webaudio-l16-stream";
 
 import { WebSocketContext } from "../api/websocket";
+import { RootState } from "../rootReducer";
 import { AudioStreamer } from "./audiostreamer";
 import { AudioBucket } from "./audiobucket";
+import { toggleMicrophone } from "./mediaSlice";
 
 const MicButtonOn = styled(AudioOutlined)`
   color: #6a96ff;
@@ -35,8 +37,13 @@ interface Props {}
 
 let micStream: MicrophoneStream;
 let l16Stream: L16;
+
 const Microphone: React.FunctionComponent<Props> = () => {
-  const [muted, setMuted] = useState(true);
+  const dispatch = useDispatch();
+  const muted = useSelector<RootState, boolean>(
+    (state) => state.media.human.muted
+  );
+
   const ws = useContext(WebSocketContext);
 
   const startRecognitionStream = async () => {
@@ -74,12 +81,13 @@ const Microphone: React.FunctionComponent<Props> = () => {
       if (muted) {
         startRecognitionStream();
       } else {
-        (micStream as any).unpipe(l16Stream);
-        (micStream as any).pipe(AudioBucket);
+        micStream.unpipe(l16Stream);
+        micStream.pipe(AudioBucket);
       }
-      setMuted((muted) => !muted);
+      dispatch(toggleMicrophone());
     }
   };
+
   return muted ? (
     <MicButtonOff onMouseUp={toggleMic} />
   ) : (

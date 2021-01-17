@@ -7,10 +7,12 @@ export interface ChatMessage {
 
 export interface ChatState {
   messages: ChatMessage[];
+  sidebarOpen: boolean;
 }
 
 let initialState: ChatState = {
   messages: [],
+  sidebarOpen: false,
 };
 
 const chatSlice = createSlice({
@@ -23,9 +25,20 @@ const chatSlice = createSlice({
     resetChat(state) {
       state = initialState;
     },
+    toggleSidebar(state) {
+      state.sidebarOpen = !state.sidebarOpen;
+    },
+    closeSidebar(state) {
+      state.sidebarOpen = false;
+    },
   },
 });
 
-export const { appendChatMessage, resetChat } = chatSlice.actions;
+export const {
+  appendChatMessage,
+  resetChat,
+  toggleSidebar,
+  closeSidebar,
+} = chatSlice.actions;
 
 export default chatSlice.reducer;

@@ -6,7 +6,7 @@ import "./index.css";
 import App from "./app";
 import store from "./store";
 import WebSocketProvider from "./api/websocket";
-import SpeakerProvider from "./audio/speaker";
+import SpeakerProvider from "./audio/speaker-context";
 
 ReactDOM.render(
   <React.StrictMode>
