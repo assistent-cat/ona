@@ -9,6 +9,7 @@ function App() {
   const dispatch = useDispatch();
   const ws = useContext(WebSocketContext);
 
+  // TODO move to chat component
   const onSubmit = (utterance: string) => {
     if (utterance) {
       dispatch(

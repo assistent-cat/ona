@@ -6,16 +6,16 @@ import "./index.css";
 import App from "./app";
 import store from "./store";
 import WebSocketProvider from "./api/websocket";
-import AudioPlayerProvider from "./audio/player";
+import SpeakerProvider from "./audio/speaker";
 
 ReactDOM.render(
   <React.StrictMode>
     <Provider store={store}>
-      <AudioPlayerProvider>
+      <SpeakerProvider>
         <WebSocketProvider>
           <App />
         </WebSocketProvider>
-      </AudioPlayerProvider>
+      </SpeakerProvider>
     </Provider>
   </React.StrictMode>,
   document.getElementById("root")

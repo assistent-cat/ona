@@ -1,6 +1,7 @@
 import React, { createContext, ReactNode, useContext } from "react";
 import { useDispatch } from "react-redux";
-import { AudioPlayerContext } from "../audio/player";
+import { appendMediaTrack } from "../audio/mediaSlice";
+import { AudioPlayerContext } from "../audio/speaker";
 
 import { appendChatMessage } from "../chat/chatSlice";
 import { WS_URL } from "../config";
@@ -65,20 +66,27 @@ const WebSocketProvider = ({ children }: Props) => {
           console.log(`message arrived: ${JSON.stringify(data, null, 2)}`);
         }
 
-        if (data.msg_type === "speak") {
-          dispatch(
-            appendChatMessage({
-              message: data.utterance,
-              type: "bot",
-            })
-          );
-        } else if (data.msg_type === "recognized") {
-          dispatch(
-            appendChatMessage({
-              message: data.utterance,
-              type: "human",
-            })
-          );
+        switch (data.msg_type) {
+          case "speak":
+            dispatch(
+              appendChatMessage({
+                message: data.utterance,
+                type: "bot",
+              })
+            );
+            break;
+          case "recognized":
+            dispatch(
+              appendChatMessage({
+                message: data.utterance,
+                type: "human",
+              })
+            );
+            break;
+          case "play":
+            dispatch(appendMediaTrack(data.data));
+            break;
+          default:
         }
       } else if (message.data instanceof Blob) {
         const audioData = message.data;

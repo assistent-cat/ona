@@ -1,19 +1,16 @@
 import React, { createContext, ReactNode } from "react";
-import { useDispatch } from "react-redux";
 
 import { createLoopback } from "./loopback";
 
-interface IAudioPlayerContext {
+interface ISpeakerContext {
   speak(data: Blob): Promise<void>;
-  playStream(uri: string): void;
 }
 
-const AudioPlayerContext = createContext<IAudioPlayerContext>({
+const SpeakerContext = createContext<ISpeakerContext>({
   speak: undefined,
-  playStream: undefined,
 });
 
-export { AudioPlayerContext };
+export { SpeakerContext as AudioPlayerContext };
 
 const getAudioContext = () => {
   //   const CrossAudioContext =
@@ -28,10 +25,8 @@ interface Props {
   children: ReactNode | ReactNode[];
 }
 
-const AudioPlayerProvider = ({ children }: Props) => {
-  let player: IAudioPlayerContext;
-
-  const dispatch = useDispatch();
+const SpeakerProvider = ({ children }: Props) => {
+  let player: ISpeakerContext;
 
   let audioContext: AudioContext;
   let nextStartTime: number;
@@ -68,18 +63,13 @@ const AudioPlayerProvider = ({ children }: Props) => {
     }
   };
 
-  const playStream = () => {};
-
   player = {
     speak,
-    playStream,
   };
 
   return (
-    <AudioPlayerContext.Provider value={player}>
-      {children}
-    </AudioPlayerContext.Provider>
+    <SpeakerContext.Provider value={player}>{children}</SpeakerContext.Provider>
   );
 };
 
-export default AudioPlayerProvider;
+export default SpeakerProvider;
