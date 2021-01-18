@@ -23,8 +23,10 @@ spec:
     spec:
       containers:
         - name: ona-vosk
-          image: assistent/kaldi-catala:0.0.1
-          command: ["python", "server.py"]
+          image: assistent/kaldi-catala:0.0.2
+          env:
+            - name: VOSK_SAMPLE_RATE
+              value: "16000"
           livenessProbe:
             httpGet:
               path: /

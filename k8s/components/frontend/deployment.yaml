@@ -23,11 +23,11 @@ spec:
     spec:
       containers:
         - name: ona-frontend
-          image: ona-frontend:0.0.1
+          image: assistent-cat/ona-frontend:0.0.1
           command: ["/app/start.sh"]
           env:
             - name: ONA_CONFIG_BACKEND_PATH
-              value: "ws"
+              value: ws
           livenessProbe:
             httpGet:
               path: /

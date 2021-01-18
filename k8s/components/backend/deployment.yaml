@@ -23,7 +23,10 @@ spec:
     spec:
       containers:
         - name: ona-backend
-          image: ona-backend:0.0.1
+          image: assistent-cat/ona-backend:0.0.1
+          env:
+            - name: VOSK_SERVER_HOST
+              value: ona-vosk
           livenessProbe:
             httpGet:
               path: /
