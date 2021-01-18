@@ -4,19 +4,18 @@ import { createLoopback } from "./loopback";
 
 interface ISpeakerContext {
   speak(data: Blob): Promise<void>;
+  analyser: AnalyserNode;
 }
 
 const SpeakerContext = createContext<ISpeakerContext>({
   speak: undefined,
+  analyser: undefined,
 });
 
 export { SpeakerContext };
 
 const getAudioContext = () => {
-  //   const CrossAudioContext =
-  //     window.AudioContext || (window as any).webkitAudioContext;
   const audioContext = new window.AudioContext({ sampleRate: 22050 });
-  // const analyser = audioContext.createAnalyser();
 
   return audioContext;
 };
@@ -28,32 +27,33 @@ interface Props {
 const SpeakerProvider = ({ children }: Props) => {
   let player: ISpeakerContext;
 
-  let audioContext: AudioContext;
-  let nextStartTime: number;
-  let destinationNode: MediaStreamAudioDestinationNode;
+  let initialised = false;
+  const audioContext = getAudioContext();
+  const analyser = audioContext.createAnalyser();
+  const destinationNode = audioContext.createMediaStreamDestination();
+  const onaSpeaker: HTMLAudioElement = document.getElementById(
+    "ona-speaker"
+  ) as HTMLAudioElement;
+  let nextStartTime = audioContext.currentTime;
+
   let loopbackStream: MediaStream;
   let source: AudioBufferSourceNode;
-  let onaSpeaker: HTMLAudioElement;
-
   const init = async () => {
-    audioContext = getAudioContext();
-    nextStartTime = audioContext.currentTime;
-    destinationNode = audioContext.createMediaStreamDestination();
     loopbackStream = await createLoopback(destinationNode);
-    onaSpeaker = document.getElementById("ona-speaker") as HTMLAudioElement;
+    initialised = true;
   };
 
   const speak = async (audioData: Blob) => {
     const arrayBuffer = await audioData.arrayBuffer();
     if (arrayBuffer && arrayBuffer.byteLength > 0) {
-      if (!audioContext) {
+      if (!initialised) {
         await init();
       }
 
       source = audioContext.createBufferSource();
       const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
       source.buffer = audioBuffer;
-      source.connect(destinationNode);
+      source.connect(analyser).connect(destinationNode);
       source.start(nextStartTime);
       nextStartTime += audioBuffer.duration;
 
@@ -65,6 +65,7 @@ const SpeakerProvider = ({ children }: Props) => {
 
   player = {
     speak,
+    analyser,
   };
 
   return (

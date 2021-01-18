@@ -6,6 +6,7 @@ import ReactPlayer from "react-player";
 import { RootState } from "../rootReducer";
 import { MediaState } from "./mediaSlice";
 import { getMediaUri } from "./utils";
+import WaveVisualizer from "./wave-visualizer";
 
 interface Props {}
 
@@ -32,7 +33,9 @@ const MediaPlayer: React.FunctionComponent<Props> = () => {
           width="100%"
           height="100%"
         />
-      ) : null}
+      ) : (
+        <WaveVisualizer />
+      )}
     </ContentWrapper>
   );
 };
