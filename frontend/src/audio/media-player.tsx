@@ -23,7 +23,7 @@ const MediaPlayer: React.FunctionComponent<Props> = () => {
   const mediaUri = getMediaUri(media.tracks?.[media.tracks.length - 1]);
   return (
     <ContentWrapper>
-      {mediaUri ? (
+      {mediaUri && !media.stopped ? (
         <ReactPlayer
           playing={media.playing}
           volume={media.volume}

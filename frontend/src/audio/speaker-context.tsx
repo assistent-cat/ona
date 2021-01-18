@@ -1,14 +1,20 @@
-import React, { createContext, ReactNode } from "react";
+import React, { createContext, ReactNode, useEffect } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "../rootReducer";
 
 import { createLoopback } from "./loopback";
 
 interface ISpeakerContext {
   speak(data: Blob): Promise<void>;
+  stop(): void;
+  setVolume(vol: number): void;
   analyser: AnalyserNode;
 }
 
 const SpeakerContext = createContext<ISpeakerContext>({
   speak: undefined,
+  stop: undefined,
+  setVolume: undefined,
   analyser: undefined,
 });
 
@@ -26,6 +32,7 @@ interface Props {
 
 const SpeakerProvider = ({ children }: Props) => {
   let player: ISpeakerContext;
+  const volume = useSelector<RootState, number>((state) => state.media.volume);
 
   let initialised = false;
   const audioContext = getAudioContext();
@@ -63,8 +70,26 @@ const SpeakerProvider = ({ children }: Props) => {
     }
   };
 
+  const stop = () => {
+    if (onaSpeaker) {
+      onaSpeaker.src = "";
+    }
+  };
+
+  const setVolume = (volume: number) => {
+    if (onaSpeaker) {
+      onaSpeaker.volume = volume;
+    }
+  };
+
+  useEffect(() => {
+    onaSpeaker.volume = volume;
+  }, [volume, onaSpeaker]);
+
   player = {
     speak,
+    stop,
+    setVolume,
     analyser,
   };
 

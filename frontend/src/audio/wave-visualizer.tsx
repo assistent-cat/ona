@@ -16,11 +16,11 @@ const WaveVisualizer: React.FunctionComponent<Props> = () => {
   let { analyser } = useContext(SpeakerContext);
 
   const updateWave = useCallback(() => {
-    if (analyser) {
+    const canvas = canvasRef.current;
+    if (analyser && canvas) {
       const dataArray = new Uint8Array(analyser.frequencyBinCount);
 
       analyser.getByteTimeDomainData(dataArray);
-      const canvas = canvasRef.current;
       const height = canvas.height;
       const width = canvas.width;
       const context = canvas.getContext("2d");

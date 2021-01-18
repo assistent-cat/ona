@@ -13,4 +13,12 @@ interface PlayMediaMessage {
   data: MediaTrack;
 }
 
-export type BusMessage = SpeakMessage | RecognizedMessage | PlayMediaMessage;
+interface StopMessage {
+  msg_type: "stop";
+}
+
+export type BusMessage =
+  | SpeakMessage
+  | RecognizedMessage
+  | PlayMediaMessage
+  | StopMessage;

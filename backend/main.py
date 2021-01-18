@@ -108,6 +108,10 @@ class OnaFactory(HiveMind):
                 "msg_type": "play",
                 "data": message.data
             }
+        elif message.msg_type == "mycroft.stop":
+            payload = {
+                "msg_type": "stop"
+            }
         else:
             return
 

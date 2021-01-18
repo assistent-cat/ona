@@ -15,10 +15,10 @@ const VolumeSlider = styled.div`
   position: absolute;
   display: inline-block;
   height: 12rem;
-  bottom: 0;
+  bottom: 99%;
   left: 0;
   padding: 0.75rem;
-  padding-bottom: 100%;
+  padding-bottom: 1%;
 `;
 
 const SpeakerButton = styled(SoundOutlined)<{ muted: boolean }>`

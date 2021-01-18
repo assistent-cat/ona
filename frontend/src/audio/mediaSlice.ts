@@ -23,6 +23,7 @@ export interface MediaState {
   media: {
     tracks: MediaTrack[];
     playing: boolean;
+    stopped: boolean;
     muted: boolean;
     volume: number;
   };
@@ -37,7 +38,8 @@ let initialState: MediaState = {
   },
   media: {
     tracks: [],
-    playing: true,
+    playing: false,
+    stopped: true,
     muted: false,
     volume: 1,
   },
@@ -78,8 +80,13 @@ const mediaSlice = createSlice({
         tracks: appendOrMergeTrack(state.media.tracks, action.payload),
         muted: false,
         playing: true,
+        stopped: false,
         volume: 1,
       };
+    },
+
+    stopPlayingMedia(state) {
+      state.media.stopped = true;
     },
 
     resetMedia(state) {
@@ -119,6 +126,7 @@ export const {
   toggleSpeaker,
   setMediaVolume,
   setVolume,
+  stopPlayingMedia,
 } = mediaSlice.actions;
 
 export default mediaSlice.reducer;

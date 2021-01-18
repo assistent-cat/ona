@@ -1,6 +1,9 @@
 import React, { createContext, ReactNode, useContext } from "react";
 import { useDispatch } from "react-redux";
-import { resolveAndAppendMediaTrack } from "../audio/mediaSlice";
+import {
+  resolveAndAppendMediaTrack,
+  stopPlayingMedia,
+} from "../audio/mediaSlice";
 import { SpeakerContext } from "../audio/speaker-context";
 
 import { appendChatMessage } from "../chat/chatSlice";
@@ -85,6 +88,10 @@ const WebSocketProvider = ({ children }: Props) => {
             break;
           case "play":
             dispatch(resolveAndAppendMediaTrack(data.data));
+            break;
+          case "stop":
+            dispatch(stopPlayingMedia());
+            player.stop();
             break;
           default:
         }
