@@ -20,24 +20,20 @@ export interface MediaState {
     muted: boolean;
   };
 
-  ona: {
-    muted: boolean;
-  };
-
   media: {
     tracks: MediaTrack[];
     playing: boolean;
     muted: boolean;
     volume: number;
   };
+  muted: boolean;
+  volume: number;
+  volumeStore: number;
 }
 
 let initialState: MediaState = {
   human: {
     muted: true,
-  },
-  ona: {
-    muted: false,
   },
   media: {
     tracks: [],
@@ -45,6 +41,9 @@ let initialState: MediaState = {
     muted: false,
     volume: 1,
   },
+  muted: false,
+  volume: 1,
+  volumeStore: 1,
 };
 
 const appendOrMergeTrack = (
@@ -82,11 +81,33 @@ const mediaSlice = createSlice({
         volume: 1,
       };
     },
+
     resetMedia(state) {
       state = initialState;
     },
+
     toggleMicrophone(state) {
       state.human.muted = !state.human.muted;
+    },
+
+    toggleSpeaker(state) {
+      state.muted = !state.muted;
+      state.media.muted = state.muted;
+      state.volume = state.muted ? 0 : state.volumeStore;
+      state.media.volume = state.volume;
+    },
+
+    setMediaVolume(state, action: PayloadAction<number>) {
+      state.media.volume = action.payload;
+    },
+
+    setVolume(state, action: PayloadAction<number>) {
+      state.volume = action.payload;
+      state.volumeStore = action.payload;
+      state.media.volume = action.payload;
+
+      state.muted = state.volume === 0;
+      state.media.muted = state.muted;
     },
   },
 });
@@ -95,6 +116,9 @@ export const {
   appendMediaTrack,
   resetMedia,
   toggleMicrophone,
+  toggleSpeaker,
+  setMediaVolume,
+  setVolume,
 } = mediaSlice.actions;
 
 export default mediaSlice.reducer;

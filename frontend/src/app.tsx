@@ -4,6 +4,7 @@ import styled from "styled-components";
 import MediaPlayer from "./audio/media-player";
 
 import Microphone from "./audio/microphone";
+import SpeakerControl from "./audio/speaker-control";
 import Chat from "./chat/chat";
 import ChatControl from "./chat/chat-control";
 import { RootState } from "./rootReducer";
@@ -57,6 +58,7 @@ function App() {
           <MediaPlayer />
         </MediaWrapper>
         <ControlsWrapper>
+          <SpeakerControl />
           <Microphone />
           <ChatControl />
         </ControlsWrapper>

@@ -11,7 +11,7 @@
     "@types/node": "^12.19.11",
     "@types/react": "^16.14.2",
     "@types/react-dom": "^16.9.10",
-    "antd": "^4.9.4",
+    "antd": "^4.10.2",
     "microphone-stream": "^5.1.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
