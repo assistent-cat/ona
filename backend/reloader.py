@@ -19,7 +19,7 @@ class SourceChangeMonitor(threading.Thread):
         PATHS_TO_WATCH = ('/opt/backend', '/opt/venv/lib/python3.8/site-packages/jarbas_hive_mind')
 
         # Entry point program to run                                                                                         
-        PROGRAM = '/opt/backend/main.py'
+        PROGRAM = '/opt/backend/ona_backend/__main__.py'
 
         def __init__(self):
                 threading.Thread.__init__(self)

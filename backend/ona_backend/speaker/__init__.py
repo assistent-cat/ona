@@ -1,4 +1,5 @@
 import requests
+import os
 from threading import Thread
 from queue import Empty
 from pydub import AudioSegment
@@ -7,10 +8,13 @@ from hashlib import sha512
 from os.path import join, isfile, isdir
 from os import makedirs
 
+catotron_server_host = os.getenv('CATOTRON_SERVER_HOST') or 'catotron'
+catotron_server_port = os.getenv('CATOTRON_SERVER_PORT') or 9000
+
 class WebsocketAudioSource(Thread):
     def __init__(self, queue):
         super(WebsocketAudioSource, self).__init__()
-        self.url = "http://catotron:9000/synthesize"
+        self.url = f"http://{catotron_server_host}:{catotron_server_port}/synthesize"
         self.queue = queue
         self.cache = "/tmp/catotron"
         self.sample_rate = 22050

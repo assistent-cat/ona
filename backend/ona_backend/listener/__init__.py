@@ -6,8 +6,8 @@ from queue import Queue, Empty
 from threading import Thread
 
 import grpc
-import stt_service_pb2
-import stt_service_pb2_grpc
+from ona_backend.stt_grpc.stt_service_pb2 import RecognitionSpec, RecognitionConfig, StreamingRecognitionRequest
+from ona_backend.stt_grpc.stt_service_pb2_grpc import SttServiceStub
 
 vad = webrtcvad.Vad(3)
 vosk_server_host = os.getenv('VOSK_SERVER_HOST') or 'localhost'
@@ -38,7 +38,7 @@ class WebsocketAudioListener(Thread):
 
     def run(self):
         while self.keep_running():
-            stub = stt_service_pb2_grpc.SttServiceStub(channel)
+            stub = SttServiceStub(channel)
             results = stub.StreamingRecognize(self.vad_generator())
             try:
                 for r in results:
@@ -69,15 +69,15 @@ class WebsocketAudioListener(Thread):
                 yield audio_block
 
     def vad_generator(self):
-        specification = stt_service_pb2.RecognitionSpec(
+        specification = RecognitionSpec(
             partial_results=True,
             audio_encoding='LINEAR16_PCM',
             sample_rate_hertz=self.sample_rate
         )
         
-        streaming_config = stt_service_pb2.RecognitionConfig(specification=specification)
+        streaming_config = RecognitionConfig(specification=specification)
 
-        yield stt_service_pb2.StreamingRecognitionRequest(config=streaming_config)
+        yield StreamingRecognitionRequest(config=streaming_config)
         
         for audio_block in self.queue_generator():
             try:
@@ -92,10 +92,10 @@ class WebsocketAudioListener(Thread):
                 if num_voiced > self.ratio * self.ring_buffer.maxlen:
                     self.triggered = True
                     for f, s in self.ring_buffer:
-                        yield stt_service_pb2.StreamingRecognitionRequest(audio_content=bytes(f))
+                        yield StreamingRecognitionRequest(audio_content=bytes(f))
                     self.ring_buffer.clear()
             else:
-                yield stt_service_pb2.StreamingRecognitionRequest(audio_content=bytes(audio_block))
+                yield StreamingRecognitionRequest(audio_content=bytes(audio_block))
                 self.ring_buffer.append((audio_block, is_speech))
                 num_unvoiced = len(
                     [f for f, speech in self.ring_buffer if not speech])

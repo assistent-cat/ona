@@ -9,8 +9,8 @@ from jarbas_hive_mind.database import ClientDatabase
 from ovos_utils.log import LOG
 from ovos_utils.messagebus import Message
 
-from listener import WebsocketAudioListener
-from speaker import WebsocketAudioSource
+from ona_backend.listener import WebsocketAudioListener
+from ona_backend.speaker import WebsocketAudioSource
 
 
 class OnaBackendProtocol(HiveMindProtocol):
