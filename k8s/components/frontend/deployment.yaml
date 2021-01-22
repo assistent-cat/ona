@@ -23,11 +23,15 @@ spec:
     spec:
       containers:
         - name: ona-frontend
-          image: assistent-cat/ona-frontend:0.0.1
+          image: assistent/ona-frontend:0.0.1
           command: ["/app/start.sh"]
           env:
+            - name: ONA_CONFIG_BACKEND_HOST
+              value: "ona.assistent.cat"
             - name: ONA_CONFIG_BACKEND_PATH
-              value: ws
+              value: "ws/"
+            - name: ONA_CONFIG_BACKEND_PORT
+              value: "80"
           livenessProbe:
             httpGet:
               path: /

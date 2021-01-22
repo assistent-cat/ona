@@ -2,6 +2,9 @@ apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
   name: ona-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
 spec:
   tls:
     - hosts:
@@ -14,7 +17,7 @@ spec:
         backend:
           serviceName: ona-frontend
           servicePort: 80
-      - path: /ws
+      - path: /ws/
         backend:
           serviceName: ona-backend
           servicePort: 5678

@@ -7,28 +7,34 @@ mycroft-catala:
 create-kind-cluster:
 	kind create cluster --config k8s/cluster/cluster.yaml
 	
-use-kind-context: create-kind-cluster
+use-kind-context:
 	kubectl config use-context kind-kind 
-
+	
 setup-kind-cluster: use-kind-context
-	kubectl apply -f k8s/cluster/cert-manager.yaml -f k8s/cluster/ingress-nginx.yaml -f k8s/cluster/metrics-server.yaml
+	kustomize build k8s/cluster/config | kubectl apply -f -
 
 docker-build-frontend:
-	docker build ./frontend -f frontend/Dockerfile -t assistent-cat/ona-frontend:${TAG}
+	docker build ./frontend -f frontend/Dockerfile -t assistent/ona-frontend:${TAG}
 	
 docker-build-backend:
-	docker build ./backend -f backend/Dockerfile -t assistent-cat/ona-backend:${TAG}
+	docker build ./backend -f backend/Dockerfile -t assistent/ona-backend:${TAG}
 	
 kind-load-frontend: docker-build-frontend
-	kind load docker-image assistent-cat/ona-frontend:${TAG}
+	kind load docker-image assistent/ona-frontend:${TAG}
 
 kind-load-backend: docker-build-backend
-	kind load docker-image assistent-cat/ona-backend:${TAG}
-	
+	kind load docker-image assistent/ona-backend:${TAG}
+
+kind-load-catotron:
+	docker pull assistent/catotron-cpu:latest && kind load docker-image assistent/catotron-cpu:latest
+
+kind-load-vosk:
+	docker pull assistent/kaldi-catala:0.0.2 && kind load docker-image assistent/kaldi-catala:0.0.2
+
 kind-load-images: kind-load-frontend kind-load-backend
 
-deploy-components:
+deploy-components: use-kind-context
 	kustomize build k8s/components | kubectl apply -f -
 
-undeploy-components:
+undeploy-components: use-kind-context
 	kustomize build k8s/components | kubectl delete -f -

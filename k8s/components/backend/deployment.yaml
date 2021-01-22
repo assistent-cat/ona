@@ -23,10 +23,12 @@ spec:
     spec:
       containers:
         - name: ona-backend
-          image: assistent-cat/ona-backend:0.0.1
+          image: assistent/ona-backend:0.0.1
           env:
             - name: VOSK_SERVER_HOST
               value: ona-vosk
+            - name: CATOTRON_SERVER_HOST
+              value: ona-catrotron
           livenessProbe:
             httpGet:
               path: /

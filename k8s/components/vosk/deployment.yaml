@@ -27,20 +27,6 @@ spec:
           env:
             - name: VOSK_SAMPLE_RATE
               value: "16000"
-          livenessProbe:
-            httpGet:
-              path: /
-              port: 2700
-            initialDelaySeconds: 5
-            timeoutSeconds: 1
-            periodSeconds: 30
-          readinessProbe:
-            httpGet:
-              path: /
-              port: 2700
-            initialDelaySeconds: 5
-            timeoutSeconds: 1
-            periodSeconds: 30
           resources:
             requests:
               memory: 512Mi
