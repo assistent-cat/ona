@@ -28,7 +28,7 @@ spec:
             - name: VOSK_SERVER_HOST
               value: ona-vosk
             - name: CATOTRON_SERVER_HOST
-              value: ona-catrotron
+              value: ona-catotron
           livenessProbe:
             httpGet:
               path: /
@@ -43,13 +43,6 @@ spec:
             initialDelaySeconds: 5
             timeoutSeconds: 1
             periodSeconds: 30
-          resources:
-            requests:
-              memory: 128Mi
-              cpu: 100m
-            limits:
-              memory: 256Mi
-              cpu: 200m
           ports:
             - containerPort: 5678
               protocol: TCP

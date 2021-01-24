@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
         - name: ona-catotron
-          image: assistent/catotron-cpu:latest
+          image: assistent/catotron-cpu:0.0.1
           command: ["python", "server.py"]
           livenessProbe:
             httpGet:
@@ -39,13 +39,6 @@ spec:
             initialDelaySeconds: 5
             timeoutSeconds: 1
             periodSeconds: 30
-          resources:
-            requests:
-              memory: 512Mi
-              cpu: 100m
-            limits:
-              memory: 1024Mi
-              cpu: 200m
           ports:
             - containerPort: 9000
               protocol: TCP
