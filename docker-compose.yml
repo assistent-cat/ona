@@ -20,7 +20,7 @@ services:
       - ./mycroft-catala/mycroft-core/mycroft:/opt/mycroft/mycroft
   catotron:
     container_name: ona-catotron
-    image: assistent/catotron-cpu:latest
+    image: assistent/catotron-cpu:0.0.1
     ports:
       - "9000:9000"
     entrypoint: python server.py
