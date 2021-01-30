@@ -116,9 +116,11 @@ class OnaFactory(HiveMind):
         for peer in peers:
             if peer and peer in self.clients:
                 client = self.clients[peer].get("instance")
-                self.interface.send(payload, client)
                 if payload["msg_type"] == "speak":
-                    self.audio_source_queue.put((payload["utterance"], client))
+                    self.audio_source_queue.put((payload, client))
+                else:
+                    self.interface.send(payload, client)
+                    
 
     def emit_utterance_to_bus(self, client, utterance):
         bus_message = {

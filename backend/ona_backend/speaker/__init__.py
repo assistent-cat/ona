@@ -1,5 +1,6 @@
 import requests
 import os
+import json
 from threading import Thread
 from queue import Empty
 from pydub import AudioSegment
@@ -26,14 +27,20 @@ class WebsocketAudioSource(Thread):
     def run(self):
         while self.running:
             try:
-                (utterance, client) = self.queue.get(timeout=0.5)
-                self.handle_speak_message(utterance, client)
+                (payload, client) = self.queue.get(timeout=0.5)
+                self.handle_speak_message(payload, client)
             except Empty:
                 pass
 
-    def handle_speak_message(self, utterance, client):
-        audio_data = self.get_tts(utterance)
-        client.sendMessage(audio_data, True)
+    def handle_speak_message(self, payload, client):
+        utterance = payload["utterance"]
+        try:
+            audio_data = self.get_tts(utterance)
+            client.sendMessage(audio_data, True)
+        except:
+            pass
+        payload = json.dumps(payload)
+        client.sendMessage(payload)
         
     def _get_unique_file_path(self, utterance):
         file_name = sha512(utterance.encode('utf-8')).hexdigest()
