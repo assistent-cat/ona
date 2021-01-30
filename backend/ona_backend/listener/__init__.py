@@ -4,6 +4,8 @@ import os
 from collections import deque
 from queue import Queue, Empty
 from threading import Thread
+from precise_runner import PreciseRunner, PreciseEngine, ReadWriteStream
+from ovos_utils.log import LOG
 
 import grpc
 from ona_backend.stt_grpc.stt_service_pb2 import RecognitionSpec, RecognitionConfig, StreamingRecognitionRequest
@@ -23,6 +25,22 @@ class WebsocketAudioListener(Thread):
         self.vad = webrtcvad.Vad(1)
         self.queue = queue
 
+        self.hotword_found = False
+        self.hotword_stream = ReadWriteStream()
+
+        def on_activation():
+            self.hotword_found = True
+
+        trigger_level = 1
+        sensitivity = 0.5
+
+        self.hotword_runner = PreciseRunner(
+            PreciseEngine('/opt/backend/precise-engine/precise-engine', '/opt/backend/hey-mycroft.pb'),
+            trigger_level, sensitivity,
+            stream=self.hotword_stream, on_activation=on_activation,
+        )
+        self.hotword_runner.start()
+        
         BLOCKS_PER_SECOND = 50
         self.block_size = int(
             self.sample_rate / float(BLOCKS_PER_SECOND))  # 320
@@ -38,6 +56,9 @@ class WebsocketAudioListener(Thread):
 
     def run(self):
         while self.keep_running():
+            LOG.debug('Start Hotword detection')
+            self.wait_for_hotword()
+            LOG.debug('Hotword detected')
             stub = SttServiceStub(channel)
             results = stub.StreamingRecognize(self.vad_generator())
             try:
@@ -68,6 +89,17 @@ class WebsocketAudioListener(Thread):
                 audio_data = audio_data[self.block_size:]
                 yield audio_block
 
+    def wait_for_hotword(self):
+        buffered_audio = bytearray()
+        for audio_block in self.queue_generator():
+            buffered_audio.extend(audio_block)
+            if len(buffered_audio) > 2048:
+                self.hotword_stream.write(bytes(buffered_audio[:2048]))
+                buffered_audio = buffered_audio[2048:]
+            if self.hotword_found:
+                self.hotword_found = False
+                break;
+        
     def vad_generator(self):
         specification = RecognitionSpec(
             partial_results=True,
@@ -110,4 +142,5 @@ class WebsocketAudioListener(Thread):
             self.factory.emit_utterance_to_ona(self.client, utterance)
 
     def stop(self):
+        self.hotword_runner.stop()
         self.running = False

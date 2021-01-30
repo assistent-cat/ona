@@ -38,13 +38,8 @@ class OnaBackendProtocol(HiveMindProtocol):
         return (None, headers)
 
     def onMessage(self, payload, isBinary):
-        if isBinary:
-            LOG.debug(
-                "Binary message received: {0} bytes".format(len(payload)))
-        else:
+        if not isBinary:
             payload = self.decode(payload)
-            LOG.debug(
-                "Missatge de text rebut: {0}".format(payload))
 
         self.factory.on_message_from_client(self, payload, isBinary)
 
