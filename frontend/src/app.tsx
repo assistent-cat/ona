@@ -7,6 +7,7 @@ import Microphone from "./audio/microphone";
 import SpeakerControl from "./audio/speaker-control";
 import Chat from "./chat/chat";
 import ChatControl from "./chat/chat-control";
+import IntroModal from "./intro-modal";
 import { RootState } from "./rootReducer";
 
 const ContentWrapper = styled.div`
@@ -53,6 +54,7 @@ function App() {
 
   return (
     <ContentWrapper>
+      <IntroModal />
       <MainWrapper>
         <MediaWrapper>
           <MediaPlayer />
