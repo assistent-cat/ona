@@ -40,11 +40,13 @@ const ControlsWrapper = styled.div`
 const ChatSidebar = styled.div<{ open: boolean }>`
   height: 100%;
   overflow: hidden;
-  max-width: 40%;
   width: ${({ open }) => (open ? "600vw" : "0px")};
   background-color: #fcfcfc;
   border: 1px solid #f2f2f2;
   transition: all 0.5s ease-out 0s;
+  @media screen and (min-width: 40em) {
+    max-width: 40em;
+  }
 `;
 
 function App() {
