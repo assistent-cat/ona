@@ -76,6 +76,13 @@ class OnaFactory(HiveMind):
             if msg_type == "recognized_utterance":
                 utterance = payload.get('utterance')
                 self.emit_utterance_to_bus(client, utterance)
+            elif msg_type == "welcome":
+                # Extract to skill
+                msg_type = "speak"
+                data = {
+                    'utterance': "Hola! en què et puc ajudar?"
+                }
+                self.emit_to_ona(client, msg_type, data)
 
     def on_message_from_mycroft(self, message=None):
         # forward internal messages to clients if they are the target

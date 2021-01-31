@@ -1,6 +1,6 @@
 import { AudioMutedOutlined, AudioOutlined } from "@ant-design/icons";
 import MicrophoneStream from "microphone-stream";
-import React, { useContext, useEffect } from "react";
+import React, { useCallback, useContext, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
 import L16 from "watson-speech/speech-to-text/webaudio-l16-stream";
@@ -11,8 +11,8 @@ import { AudioStreamer } from "./audiostreamer";
 import { AudioBucket } from "./audiobucket";
 import { toggleMicrophone } from "./mediaSlice";
 
-const MicButtonOn = styled(AudioOutlined)<{ listening: boolean }>`
-  color: ${({ listening }) => (listening ? "red" : "#6a96ff")};
+const MicButtonOn = styled(AudioOutlined)<{ onaListening: boolean }>`
+  color: ${({ onaListening }) => (onaListening ? "red" : "#6a96ff")};
   box-sizing: border-box;
   padding: 0.2rem 0 0.2rem 0.5rem;
   > svg {
@@ -50,7 +50,7 @@ const Microphone: React.FunctionComponent<Props> = () => {
 
   const ws = useContext(WebSocketContext);
 
-  const startRecognitionStream = async () => {
+  const startRecognitionStream = useCallback(async () => {
     const audioStreamer = new AudioStreamer(ws.socket);
     if (!micStream) {
       micStream = new MicrophoneStream({
@@ -78,18 +78,20 @@ const Microphone: React.FunctionComponent<Props> = () => {
 
     l16Stream = new L16({ writableObjectMode: true });
     micStream.pipe(l16Stream).pipe(audioStreamer);
-  };
+  }, [ws?.socket]);
 
   useEffect(() => {
     if (ws?.socket && ws.socket.readyState === 1) {
       if (!muted) {
         startRecognitionStream();
       } else {
-        micStream.unpipe(l16Stream);
-        micStream.pipe(AudioBucket);
+        if (micStream) {
+          micStream.unpipe(l16Stream);
+          micStream.pipe(AudioBucket);
+        }
       }
     }
-  }, [muted]);
+  }, [muted, startRecognitionStream, ws?.socket]);
 
   const toggleMic = () => {
     dispatch(toggleMicrophone());
@@ -98,7 +100,7 @@ const Microphone: React.FunctionComponent<Props> = () => {
   return muted ? (
     <MicButtonOff onMouseUp={toggleMic} />
   ) : (
-    <MicButtonOn onMouseUp={toggleMic} listening={listening} />
+    <MicButtonOn onMouseUp={toggleMic} onaListening={listening} />
   );
 };
 

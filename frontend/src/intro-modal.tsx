@@ -1,8 +1,11 @@
 import { Modal } from "antd";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { useDispatch } from "react-redux";
 import styled from "styled-components";
+
+import { WebSocketContext } from "./api/websocket";
 import { toggleMicrophone } from "./audio/mediaSlice";
+
 interface Props {}
 
 const Destacat = styled.span`
@@ -14,9 +17,16 @@ const Destacat = styled.span`
 const IntroModal: React.FunctionComponent<Props> = () => {
   const [visible, setVisible] = useState(true);
   const dispatch = useDispatch();
+  const ws = useContext(WebSocketContext);
 
   const onOk = () => {
     hide();
+    ws.socket.send(
+      JSON.stringify({
+        msg_type: "welcome",
+        payload: {},
+      })
+    );
     dispatch(toggleMicrophone());
   };
   const hide = () => {
@@ -36,11 +46,11 @@ const IntroModal: React.FunctionComponent<Props> = () => {
         L'Ona és una assistent de veu en català que és possible només gràcies
         als esforços de la comunitat de programari lliure catalana i d'entitats
         com{" "}
-        <a href="https://www.softcatala.org" target="_blank">
+        <a href="https://www.softcatala.org" target="_blank" rel="noreferrer">
           Softcatalà
         </a>{" "}
         i{" "}
-        <a href="https://collectivat.cat" target="_blank">
+        <a href="https://collectivat.cat" target="_blank" rel="noreferrer">
           Col·lectivaT
         </a>
         .
