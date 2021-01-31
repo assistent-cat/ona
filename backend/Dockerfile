@@ -14,7 +14,7 @@ COPY --chown=ona ./ona_backend ./ona_backend
 COPY --chown=ona ./supervisord.conf /opt/mycroft/supervisord.conf
 COPY --chown=ona ./mycroft.conf /home/ona/.mycroft/mycroft.conf
 
-RUN wget https://github.com/MycroftAI/mycroft-precise/releases/download/v0.3.0/precise-engine_0.3.0_x86_64.tar.gz && tar xvf precise-engine.tar.gz
+RUN wget https://github.com/MycroftAI/mycroft-precise/releases/download/v0.3.0/precise-engine_0.3.0_x86_64.tar.gz && tar xvf precise-engine_0.3.0_x86_64.tar.gz
 RUN wget https://github.com/MycroftAI/precise-data/raw/models/hey-mycroft.tar.gz && tar xvf hey-mycroft.tar.gz
 ENV PYTHONPATH="/opt/backend:${PYTHONPATH}"
 
