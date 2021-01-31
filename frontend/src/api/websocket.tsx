@@ -2,6 +2,7 @@ import React, { createContext, ReactNode, useContext } from "react";
 import { useDispatch } from "react-redux";
 import {
   resolveAndAppendMediaTrack,
+  setListening,
   stopPlayingMedia,
 } from "../audio/mediaSlice";
 import { SpeakerContext } from "../audio/speaker-context";
@@ -85,6 +86,7 @@ const WebSocketProvider = ({ children }: Props) => {
                 type: "human",
               })
             );
+            dispatch(setListening(false));
             break;
           case "play":
             dispatch(resolveAndAppendMediaTrack(data.data));
@@ -92,6 +94,9 @@ const WebSocketProvider = ({ children }: Props) => {
           case "stop":
             dispatch(stopPlayingMedia());
             player.stop();
+            break;
+          case "listening":
+            dispatch(setListening(true));
             break;
           default:
         }

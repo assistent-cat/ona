@@ -17,8 +17,13 @@ interface StopMessage {
   msg_type: "stop";
 }
 
+interface ListeningMessage {
+  msg_type: "listening";
+}
+
 export type BusMessage =
   | SpeakMessage
   | RecognizedMessage
   | PlayMediaMessage
-  | StopMessage;
+  | StopMessage
+  | ListeningMessage;

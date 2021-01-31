@@ -98,6 +98,7 @@ class WebsocketAudioListener(Thread):
                 buffered_audio = buffered_audio[2048:]
             if self.hotword_found:
                 self.hotword_found = False
+                self.factory.emit_hotword_detected_to_ona(self.client)
                 break;
         
     def vad_generator(self):

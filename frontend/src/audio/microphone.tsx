@@ -11,8 +11,8 @@ import { AudioStreamer } from "./audiostreamer";
 import { AudioBucket } from "./audiobucket";
 import { toggleMicrophone } from "./mediaSlice";
 
-const MicButtonOn = styled(AudioOutlined)`
-  color: #6a96ff;
+const MicButtonOn = styled(AudioOutlined)<{ listening: boolean }>`
+  color: ${({ listening }) => (listening ? "red" : "#6a96ff")};
   box-sizing: border-box;
   padding: 0.2rem 0 0.2rem 0.5rem;
   > svg {
@@ -42,6 +42,10 @@ const Microphone: React.FunctionComponent<Props> = () => {
   const dispatch = useDispatch();
   const muted = useSelector<RootState, boolean>(
     (state) => state.media.human.muted
+  );
+
+  const listening = useSelector<RootState, boolean>(
+    (state) => state.media.listening
   );
 
   const ws = useContext(WebSocketContext);
@@ -94,7 +98,7 @@ const Microphone: React.FunctionComponent<Props> = () => {
   return muted ? (
     <MicButtonOff onMouseUp={toggleMic} />
   ) : (
-    <MicButtonOn onMouseUp={toggleMic} />
+    <MicButtonOn onMouseUp={toggleMic} listening={listening} />
   );
 };
 

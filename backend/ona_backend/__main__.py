@@ -98,6 +98,10 @@ class OnaFactory(HiveMind):
                 "msg_type": "recognized",
                 "utterance": message.data['utterance']
             }
+        elif message.msg_type == "ona:hotword_detected":
+            payload = {
+                "msg_type": "listening",
+            }
         elif message.msg_type == "play:status":
             payload = {
                 "msg_type": "play",
@@ -141,6 +145,14 @@ class OnaFactory(HiveMind):
         data = {
             "utterance": utterance
         }
+        self.emit_to_ona(client, msg_type, data)
+    
+    def emit_hotword_detected_to_ona(self, client):
+        msg_type = "ona:hotword_detected"
+        data = {}
+        self.emit_to_ona(client, msg_type, data)
+        
+    def emit_to_ona(self, client, msg_type, data):
         context = {
             "source": "ona-listener",
             "destination": client.peer,
