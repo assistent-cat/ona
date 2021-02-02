@@ -12,6 +12,7 @@ from ovos_utils.messagebus import Message
 from ona_backend.listener import WebsocketAudioListener
 from ona_backend.speaker import WebsocketAudioSource
 
+LOG.name = 'ONA'
 
 class OnaBackendProtocol(HiveMindProtocol):
     def onConnect(self, request):
@@ -198,14 +199,14 @@ class OnaFactory(HiveMind):
         audio_listener.start()
 
 
-def start_mind(config=None, bus=None):
+def start_ona(config=None, bus=None):
 
     config = config or CONFIGURATION
 
     # listen
     listener = get_listener(bus=bus)
 
-    # use http
+    # use http inside cluster
     config["ssl"]["use_ssl"] = False
 
     # read port and ssl settings
@@ -216,26 +217,4 @@ def start_mind(config=None, bus=None):
 
 
 if __name__ == '__main__':
-    # TODO argparse
-    start_mind()
-
-    # that's it, now external applications can connect to the HiveMind
-
-    # use configuration to set things like
-    #  - blacklisted/whitelisted ips
-    #  - blacklisted/whitelisted message_types
-    #  - blacklisted/whitelisted intents - Coming soon
-    #  - blacklisted/whitelisted skills  - Coming soon
-
-    # you can send messages to the mycroft bus to send/broadcast to clients
-    # 'Message(hive.client.broadcast',
-    #           {"payload":
-    #               {"msg_type": "speak",
-    #               "data": {"utterance": "Connected to the HiveMind"}
-    #           })
-
-    # or you can listen to hive mind events
-    # "hive.client.connection.error"
-    # "hive.client.connect"
-    # "hive.client.disconnect"
-    # "hive.client.send.error"
+    start_ona()

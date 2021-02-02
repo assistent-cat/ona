@@ -4,12 +4,15 @@ import os
 from collections import deque
 from queue import Queue, Empty
 from threading import Thread
-from precise_runner import PreciseRunner, PreciseEngine, ReadWriteStream
+from precise_runner import PreciseRunner, ReadWriteStream
 from ovos_utils.log import LOG
 
 import grpc
 from ona_backend.stt_grpc.stt_service_pb2 import RecognitionSpec, RecognitionConfig, StreamingRecognitionRequest
 from ona_backend.stt_grpc.stt_service_pb2_grpc import SttServiceStub
+from ona_backend.listener.precise import PreciserEngine
+
+LOG.name = 'ONA'
 
 vad = webrtcvad.Vad(3)
 vosk_server_host = os.getenv('VOSK_SERVER_HOST') or 'localhost'
@@ -35,7 +38,7 @@ class WebsocketAudioListener(Thread):
         sensitivity = 0.5
 
         self.hotword_runner = PreciseRunner(
-            PreciseEngine('/opt/backend/precise-engine/precise-engine', '/opt/backend/hey-mycroft.pb'),
+            PreciserEngine('/opt/backend/precise-engine/precise-engine', '/opt/backend/hey-mycroft.pb'),
             trigger_level, sensitivity,
             stream=self.hotword_stream, on_activation=on_activation,
         )
@@ -58,6 +61,7 @@ class WebsocketAudioListener(Thread):
         while self.keep_running():
             LOG.debug('Start Hotword detection')
             self.wait_for_hotword()
+            if not self.keep_running(): break
             LOG.debug('Hotword detected')
             stub = SttServiceStub(channel)
             results = stub.StreamingRecognize(self.vad_generator())
@@ -71,6 +75,7 @@ class WebsocketAudioListener(Thread):
                         print('No available chunks')
             except grpc._channel._Rendezvous as err:
                 print('Error code %s, message: %s' % (err._state.code, err._state.details))
+        self.stop()
         
     def keep_running(self):
         return self.running and self.factory.clients.get(self.client.peer)
