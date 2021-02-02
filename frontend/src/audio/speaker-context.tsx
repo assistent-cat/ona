@@ -9,6 +9,8 @@ interface ISpeakerContext {
   stop(): void;
   setVolume(vol: number): void;
   analyser: AnalyserNode;
+  destinationNode: MediaStreamAudioDestinationNode;
+  audioContext: AudioContext;
 }
 
 const SpeakerContext = createContext<ISpeakerContext>({
@@ -16,6 +18,8 @@ const SpeakerContext = createContext<ISpeakerContext>({
   stop: undefined,
   setVolume: undefined,
   analyser: undefined,
+  destinationNode: undefined,
+  audioContext: undefined,
 });
 
 export { SpeakerContext };
@@ -91,6 +95,8 @@ const SpeakerProvider = ({ children }: Props) => {
     stop,
     setVolume,
     analyser,
+    destinationNode,
+    audioContext,
   };
 
   return (

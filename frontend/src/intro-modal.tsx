@@ -21,16 +21,17 @@ const IntroModal: React.FunctionComponent<Props> = () => {
 
   const onOk = () => {
     hide();
+    dispatch(toggleMicrophone());
+  };
+
+  const hide = () => {
+    setVisible(false);
     ws.socket.send(
       JSON.stringify({
         msg_type: "welcome",
         payload: {},
       })
     );
-    dispatch(toggleMicrophone());
-  };
-  const hide = () => {
-    setVisible(false);
   };
 
   return (
