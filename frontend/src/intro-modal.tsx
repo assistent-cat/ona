@@ -46,11 +46,19 @@ const IntroModal: React.FunctionComponent<Props> = () => {
         L'Ona és una assistent de veu en català que és possible només gràcies
         als esforços de la comunitat de programari lliure catalana i d'entitats
         com{" "}
-        <a href="https://www.softcatala.org" target="_blank" rel="noreferrer">
+        <a
+          href="https://www.softcatala.org"
+          target="_blank"
+          rel="noreferrer noopener"
+        >
           Softcatalà
         </a>{" "}
         i{" "}
-        <a href="https://collectivat.cat" target="_blank" rel="noreferrer">
+        <a
+          href="https://collectivat.cat"
+          target="_blank"
+          rel="noreferrer noopener"
+        >
           Col·lectivaT
         </a>
         .
@@ -61,13 +69,25 @@ const IntroModal: React.FunctionComponent<Props> = () => {
         exemple: <Destacat>"Ei, Mycroft. Quina hora és?"</Destacat>
       </p>
       <p>
-        El codi de l'Ona és completament obert i amb llicència AGPL. No
-        s'emmagatzema cap interacció amb l'Ona (inclòs l'audio, que només es fa
-        servir durant el processament necessari per al reconeixement de la
-        parla), la teva privacitat és important.
+        El{" "}
+        <a
+          href="https://github.com/assistent-cat/ona"
+          target="_blank"
+          rel="noreferrer noopener"
+        >
+          codi de l'Ona
+        </a>{" "}
+        és completament obert i amb llicència AGPL. No s'emmagatzema cap
+        interacció amb l'Ona (inclòs l'audio, que només es fa servir durant el
+        processament necessari per al reconeixement de la parla), la teva
+        privacitat és important.
       </p>
       <p>
-        <a href="https://www.assistent.cat">
+        <a
+          href="https://www.assistent.cat"
+          target="_blank"
+          rel="noreferrer noopener"
+        >
           Fes clic aquí per saber més sobre dels projectes que fan possible
           l'Ona.
         </a>
