@@ -3,6 +3,8 @@ import { useDispatch } from "react-redux";
 import {
   resolveAndAppendMediaTrack,
   setListening,
+  lowerMediaVolumeBy,
+  restoreMediaVolume,
   stopPlayingMedia,
 } from "../audio/mediaSlice";
 import { SpeakerContext } from "../audio/speaker-context";
@@ -97,6 +99,11 @@ const WebSocketProvider = ({ children }: Props) => {
             break;
           case "listening":
             dispatch(setListening(true));
+            dispatch(lowerMediaVolumeBy(0.2));
+            break;
+          case "waiting_for_hotword":
+            dispatch(setListening(false));
+            dispatch(restoreMediaVolume());
             break;
           default:
         }

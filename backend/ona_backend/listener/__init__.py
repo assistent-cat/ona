@@ -72,9 +72,9 @@ class WebsocketAudioListener(Thread):
                             self.emit_utterance(r.chunks[0].alternatives[0].text)
                             break
                     except LookupError:
-                        print('No available chunks')
+                        LOG.debug('No available chunks')
             except grpc._channel._Rendezvous as err:
-                print('Error code %s, message: %s' % (err._state.code, err._state.details))
+                LOG.error('Error code %s, message: %s' % (err._state.code, err._state.details))
         self.stop()
         
     def keep_running(self):
@@ -96,6 +96,7 @@ class WebsocketAudioListener(Thread):
 
     def wait_for_hotword(self):
         buffered_audio = bytearray()
+        self.factory.emit_hotword_message_to_ona("start", self.client)
         for audio_block in self.queue_generator():
             buffered_audio.extend(audio_block)
             if len(buffered_audio) > 2048:
@@ -103,7 +104,7 @@ class WebsocketAudioListener(Thread):
                 buffered_audio = buffered_audio[2048:]
             if self.hotword_found:
                 self.hotword_found = False
-                self.factory.emit_hotword_detected_to_ona(self.client)
+                self.factory.emit_hotword_message_to_ona("detected", self.client)
                 break;
         
     def vad_generator(self):

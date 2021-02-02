@@ -20,10 +20,14 @@ interface StopMessage {
 interface ListeningMessage {
   msg_type: "listening";
 }
+interface WaitingForHotwordMessage {
+  msg_type: "waiting_for_hotword";
+}
 
 export type BusMessage =
   | SpeakMessage
   | RecognizedMessage
   | PlayMediaMessage
   | StopMessage
+  | WaitingForHotwordMessage
   | ListeningMessage;
