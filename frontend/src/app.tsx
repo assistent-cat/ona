@@ -9,6 +9,8 @@ import Chat from "./chat/chat";
 import ChatControl from "./chat/chat-control";
 import IntroModal from "./intro-modal";
 import { RootState } from "./rootReducer";
+import Settings from "./user/settings";
+import SettingsControl from "./user/settings-control";
 
 const ContentWrapper = styled.div`
   display: flex;
@@ -24,6 +26,12 @@ const MainWrapper = styled.div`
   flex: 1;
 `;
 
+const HeaderWrapper = styled.div`
+  padding: 1rem;
+  display: flex;
+  overflow: auto;
+`;
+
 const MediaWrapper = styled.div`
   padding: 1rem;
   display: flex;
@@ -37,8 +45,9 @@ const ControlsWrapper = styled.div`
   justify-content: center;
 `;
 
-const ChatSidebar = styled.div<{ open: boolean }>`
+const Sidebar = styled.div<{ open: boolean; side: "left" | "right" }>`
   height: 100%;
+  ${({ side }) => (side === "left" ? "left: 0;" : "right: 0;")}
   overflow: hidden;
   width: ${({ open }) => (open ? "600vw" : "0px")};
   background-color: #fcfcfc;
@@ -50,14 +59,23 @@ const ChatSidebar = styled.div<{ open: boolean }>`
 `;
 
 function App() {
-  const sidebarOpen = useSelector<RootState, boolean>(
+  const chatSidebarOpen = useSelector<RootState, boolean>(
     (state) => state.chat.sidebarOpen
+  );
+  const userSidebarOpen = useSelector<RootState, boolean>(
+    (state) => state.user.sidebarOpen
   );
 
   return (
     <ContentWrapper>
       <IntroModal />
+      <Sidebar open={userSidebarOpen} side="left">
+        <Settings />
+      </Sidebar>
       <MainWrapper>
+        <HeaderWrapper>
+          <SettingsControl />
+        </HeaderWrapper>
         <MediaWrapper>
           <MediaPlayer />
         </MediaWrapper>
@@ -67,9 +85,9 @@ function App() {
           <ChatControl />
         </ControlsWrapper>
       </MainWrapper>
-      <ChatSidebar open={sidebarOpen}>
+      <Sidebar open={chatSidebarOpen} side="right">
         <Chat />
-      </ChatSidebar>
+      </Sidebar>
     </ContentWrapper>
   );
 }

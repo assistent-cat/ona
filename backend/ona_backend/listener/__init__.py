@@ -59,10 +59,8 @@ class WebsocketAudioListener(Thread):
 
     def run(self):
         while self.keep_running():
-            LOG.debug('Start Hotword detection')
             self.wait_for_hotword()
             if not self.keep_running(): break
-            LOG.debug('Hotword detected')
             stub = SttServiceStub(channel)
             results = stub.StreamingRecognize(self.vad_generator())
             try:
@@ -95,17 +93,27 @@ class WebsocketAudioListener(Thread):
                 yield audio_block
 
     def wait_for_hotword(self):
+        client_config = self.factory.clients.get(self.client.peer)
+        if not client_config or not client_config.get('use_hotword'): 
+            LOG.debug('Skip hotword detection')
+            return
+        LOG.debug(client_config)
         buffered_audio = bytearray()
+        LOG.debug('Start hotword detection')
         self.factory.emit_hotword_message_to_ona("start", self.client)
         for audio_block in self.queue_generator():
             buffered_audio.extend(audio_block)
             if len(buffered_audio) > 2048:
                 self.hotword_stream.write(bytes(buffered_audio[:2048]))
                 buffered_audio = buffered_audio[2048:]
+            if not client_config.get('use_hotword'):
+                break
+                
             if self.hotword_found:
                 self.hotword_found = False
+                LOG.debug('Hotword detected')
                 self.factory.emit_hotword_message_to_ona("detected", self.client)
-                break;
+                break
         
     def vad_generator(self):
         specification = RecognitionSpec(

@@ -84,6 +84,12 @@ class OnaFactory(HiveMind):
                     'utterance': "Hola! en què et puc ajudar?"
                 }
                 self.emit_to_ona(client, msg_type, data)
+            elif msg_type == "configuration":
+                use_hotword = payload.get('useHotword')
+                client_config = self.clients.get(client.peer) or None
+                if client_config:
+                    client_config['use_hotword'] = use_hotword
+
 
     def on_message_from_mycroft(self, message=None):
         # forward internal messages to clients if they are the target
@@ -199,7 +205,8 @@ class OnaFactory(HiveMind):
                                      "status": "connected",
                                      "platform": platform,
                                      "audio_queue": audio_queue,
-                                     "audio_listener": audio_listener}
+                                     "audio_listener": audio_listener,
+                                     "use_hotword": True}
         audio_listener.start()
 
 

@@ -48,7 +48,6 @@ const SpeakerProvider = ({ children }: Props) => {
   let nextStartTime = audioContext.currentTime;
 
   let loopbackStream: MediaStream;
-  let source: AudioBufferSourceNode;
   const init = async () => {
     loopbackStream = await createLoopback(destinationNode);
     initialised = true;
@@ -61,7 +60,7 @@ const SpeakerProvider = ({ children }: Props) => {
         await init();
       }
 
-      source = audioContext.createBufferSource();
+      const source = audioContext.createBufferSource();
       const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
       source.buffer = audioBuffer;
       source.connect(analyser).connect(destinationNode);

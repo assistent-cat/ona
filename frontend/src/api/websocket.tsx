@@ -1,5 +1,5 @@
-import React, { createContext, ReactNode, useContext } from "react";
-import { useDispatch } from "react-redux";
+import React, { createContext, ReactNode, useContext, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import {
   resolveAndAppendMediaTrack,
   setListening,
@@ -11,6 +11,8 @@ import { SpeakerContext } from "../audio/speaker-context";
 
 import { appendChatMessage } from "../chat/chatSlice";
 import { WS_URL } from "../config";
+import { RootState } from "../rootReducer";
+import { Configuration } from "../user/userSlice";
 import { BusMessage } from "./interfaces";
 
 interface WSContext {
@@ -46,10 +48,6 @@ const WebSocketProvider = ({ children }: Props) => {
           },
         })
       );
-    } else {
-      // TODO: some sort of ws connection watcher instead of this
-      console.log("trying to reconnect");
-      init();
     }
   };
 
@@ -63,6 +61,7 @@ const WebSocketProvider = ({ children }: Props) => {
     socket.onclose = () => {
       console.log("Connection closed");
       socket = undefined;
+      init();
     };
 
     socket.onmessage = async (message: MessageEvent<string | any>) => {
@@ -113,6 +112,21 @@ const WebSocketProvider = ({ children }: Props) => {
       }
     };
   };
+
+  const configuration = useSelector<RootState, Configuration>(
+    (state) => state.user.configuration
+  );
+
+  useEffect(() => {
+    if (socket && socket.readyState === 1) {
+      socket.send(
+        JSON.stringify({
+          msg_type: "configuration",
+          payload: configuration,
+        })
+      );
+    }
+  }, [configuration]);
 
   if (!socket) {
     init();
