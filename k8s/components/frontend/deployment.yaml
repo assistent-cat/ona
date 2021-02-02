@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
         - name: ona-frontend
-          image: assistent/ona-frontend:0.0.1
+          image: assistent/ona-frontend:0.0.2
           command: ["/app/start.sh"]
           env:
             - name: ONA_CONFIG_BACKEND_HOST
@@ -31,7 +31,9 @@ spec:
             - name: ONA_CONFIG_BACKEND_PATH
               value: "ws/"
             - name: ONA_CONFIG_BACKEND_PORT
-              value: "80"
+              value: "443"
+            - name: ONA_CONFIG_USE_SSL
+              value: "true"
           livenessProbe:
             httpGet:
               path: /

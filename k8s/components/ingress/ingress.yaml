@@ -11,7 +11,8 @@ spec:
       - ona.assistent.cat
       secretName: ona-certificate
   rules:
-  - http:
+  - host: ona.assistent.cat
+    http:
       paths:
       - path: /
         backend:

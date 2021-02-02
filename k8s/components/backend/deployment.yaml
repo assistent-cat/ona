@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
         - name: ona-backend
-          image: assistent/ona-backend:0.0.1
+          image: assistent/ona-backend:0.0.2
           env:
             - name: VOSK_SERVER_HOST
               value: ona-vosk
