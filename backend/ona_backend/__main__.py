@@ -139,7 +139,9 @@ class OnaFactory(HiveMind):
             if peer and peer in self.clients:
                 client = self.clients[peer].get("instance")
                 if payload["msg_type"] == "speak":
-                    self.audio_source_queue.put((payload, client))
+                    tts_engine = self.clients[peer].get("tts_engine")
+                    tts_voice = self.clients[peer].get("tts_voice")
+                    self.audio_source_queue.put((payload, client, tts_engine, tts_voice))
                 else:
                     self.interface.send(payload, client)
                     
@@ -206,7 +208,9 @@ class OnaFactory(HiveMind):
                                      "platform": platform,
                                      "audio_queue": audio_queue,
                                      "audio_listener": audio_listener,
-                                     "use_hotword": True}
+                                     "use_hotword": True,
+                                     "tts_engine": "catotron",
+                                     "tts_voice": "ona"}
         audio_listener.start()
 
 

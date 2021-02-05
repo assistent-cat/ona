@@ -10,3 +10,6 @@
 [submodule "vosk-server"]
 	path = vosk-server
 	url = https://github.com/ccoreilly/vosk-server.git
+[submodule "tts-service"]
+	path = tts-service
+	url = https://github.com/assistent-cat/tts-service
