@@ -1,7 +1,9 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface Configuration {
   useHotword: boolean;
+  ttsEngine: "catotron" | "festival";
+  ttsVoice: "ona" | "pau";
 }
 
 export interface UserState {
@@ -12,6 +14,8 @@ export interface UserState {
 let initialState: UserState = {
   configuration: {
     useHotword: true,
+    ttsEngine: "catotron",
+    ttsVoice: "ona",
   },
   sidebarOpen: false,
 };
@@ -29,6 +33,12 @@ const userSlice = createSlice({
     toggleSettingsSidebar(state) {
       state.sidebarOpen = !state.sidebarOpen;
     },
+    setTTSEngine(state, action: PayloadAction<Configuration["ttsEngine"]>) {
+      state.configuration.ttsEngine = action.payload;
+    },
+    setTTSVoice(state, action: PayloadAction<Configuration["ttsVoice"]>) {
+      state.configuration.ttsVoice = action.payload;
+    },
     closeSettingsSidebar(state) {
       state.sidebarOpen = false;
     },
@@ -40,6 +50,8 @@ export const {
   toggleUseHotword,
   toggleSettingsSidebar,
   closeSettingsSidebar,
+  setTTSEngine,
+  setTTSVoice,
 } = userSlice.actions;
 
 export default userSlice.reducer;

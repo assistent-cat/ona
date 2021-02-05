@@ -1,3 +1,6 @@
+import { Radio } from "antd";
+import { RadioChangeEvent } from "antd/lib/radio";
+
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import styled from "styled-components";
@@ -7,9 +10,10 @@ import { RootState } from "../rootReducer";
 import {
   closeSettingsSidebar,
   Configuration,
+  setTTSEngine,
+  setTTSVoice,
   toggleUseHotword,
 } from "./userSlice";
-import { Switch } from "antd";
 import { setListening } from "../audio/mediaSlice";
 
 const ContentWrapper = styled.div`
@@ -31,19 +35,14 @@ const SettingsHeader = styled.div`
   flex-direction: row-reverse;
 `;
 
-const SettingsElement = styled.div`
+const SettingsColumnElement = styled.div`
   width: 100%;
-  display: flex;
-  flex-direction: row;
+  margin-top: 1rem;
 `;
 
-const SettingsToggle = styled(Switch)`
-  width: auto;
-`;
-const SettingsLabel = styled.div`
-  flex: 1;
-  margin-left: 1rem;
-  box-sizing: border-box;
+const SettingsColumnTitle = styled.div`
+  margin-bottom: 0.5rem;
+  font-size: 1.2rem;
 `;
 
 const SettingsTitle = styled.div`
@@ -69,6 +68,18 @@ const SettingsClose = styled(LeftOutlined)`
   cursor: pointer;
 `;
 
+const hotwordOptions = [
+  { label: "Ei, Mycroft", value: true },
+  { label: "Desactivat", value: false },
+];
+
+const ttsOptions = [
+  { label: "Ona (Catotron)", value: "ona-catotron" },
+  { label: "Pau (Catotron)", value: "pau-catotron" },
+  { label: "Ona (Festival)", value: "ona-festival" },
+  { label: "Pau (Festival)", value: "pau-festival" },
+];
+
 interface Props {}
 
 const Settings: React.FunctionComponent<Props> = () => {
@@ -78,9 +89,16 @@ const Settings: React.FunctionComponent<Props> = () => {
     (state) => state.user.configuration
   );
 
-  const onChangeHotword = (checked: boolean, event: MouseEvent) => {
+  const onChangeHotword = (e: RadioChangeEvent) => {
     dispatch(toggleUseHotword());
-    dispatch(setListening(!checked));
+    dispatch(setListening(!e.target.value));
+  };
+
+  const onChangeTTSVoice = (e: RadioChangeEvent) => {
+    const value = e.target.value;
+    const [voice, engine] = value.split("-");
+    dispatch(setTTSEngine(engine));
+    dispatch(setTTSVoice(voice));
   };
 
   return (
@@ -90,13 +108,26 @@ const Settings: React.FunctionComponent<Props> = () => {
         <SettingsTitle>Configuració</SettingsTitle>
       </SettingsHeader>
       <SettingsWrapper>
-        <SettingsElement>
-          <SettingsToggle
-            checked={configuration.useHotword}
+        <SettingsColumnElement>
+          <SettingsColumnTitle>Paraula d'activació</SettingsColumnTitle>
+          <Radio.Group
+            options={hotwordOptions}
+            optionType="button"
+            value={configuration.useHotword}
+            buttonStyle="solid"
             onChange={onChangeHotword}
           />
-          <SettingsLabel>Paraula d'activació</SettingsLabel>
-        </SettingsElement>
+        </SettingsColumnElement>
+        <SettingsColumnElement>
+          <SettingsColumnTitle>Veu de l'assistent</SettingsColumnTitle>
+          <Radio.Group
+            options={ttsOptions}
+            optionType="button"
+            value={`${configuration.ttsVoice}-${configuration.ttsEngine}`}
+            buttonStyle="solid"
+            onChange={onChangeTTSVoice}
+          />
+        </SettingsColumnElement>
       </SettingsWrapper>
     </ContentWrapper>
   );

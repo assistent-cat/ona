@@ -12,7 +12,7 @@ from ovos_utils.messagebus import Message
 from ona_backend.listener import WebsocketAudioListener
 from ona_backend.speaker import WebsocketAudioSource
 
-LOG.name = 'ONA'
+LOG.name = "ONA"
 
 class OnaBackendProtocol(HiveMindProtocol):
     def onConnect(self, request):
@@ -75,20 +75,24 @@ class OnaFactory(HiveMind):
             msg_type = data["msg_type"]
 
             if msg_type == "recognized_utterance":
-                utterance = payload.get('utterance')
+                utterance = payload.get("utterance")
                 self.emit_utterance_to_bus(client, utterance)
             elif msg_type == "welcome":
                 # Extract to skill
                 msg_type = "speak"
                 data = {
-                    'utterance': "Hola! en què et puc ajudar?"
+                    "utterance": "Hola! en què et puc ajudar?"
                 }
                 self.emit_to_ona(client, msg_type, data)
             elif msg_type == "configuration":
-                use_hotword = payload.get('useHotword')
+                use_hotword = payload.get("useHotword")
+                tts_engine = payload.get("ttsEngine") or "catotron"
+                tts_voice = payload.get("ttsVoice") or "ona"
                 client_config = self.clients.get(client.peer) or None
                 if client_config:
-                    client_config['use_hotword'] = use_hotword
+                    client_config["use_hotword"] = use_hotword
+                    client_config["tts_engine"] = tts_engine
+                    client_config["tts_voice"] = tts_voice
 
 
     def on_message_from_mycroft(self, message=None):
@@ -105,12 +109,12 @@ class OnaFactory(HiveMind):
         if message.msg_type == "speak":
             payload = {
                 "msg_type": "speak",
-                "utterance": message.data['utterance']
+                "utterance": message.data["utterance"]
             }
         elif message.msg_type == "ona:recognized":
             payload = {
                 "msg_type": "recognized",
-                "utterance": message.data['utterance']
+                "utterance": message.data["utterance"]
             }
         elif message.msg_type == "ona:hotword_start":
             payload = {
@@ -231,5 +235,5 @@ def start_ona(config=None, bus=None):
     listener.listen(factory=factory, protocol=OnaBackendProtocol)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     start_ona()
