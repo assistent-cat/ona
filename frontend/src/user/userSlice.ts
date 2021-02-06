@@ -14,7 +14,7 @@ export interface UserState {
 let initialState: UserState = {
   configuration: {
     useHotword: true,
-    ttsEngine: "catotron",
+    ttsEngine: "festival",
     ttsVoice: "ona",
   },
   sidebarOpen: false,

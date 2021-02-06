@@ -86,7 +86,7 @@ class OnaFactory(HiveMind):
                 self.emit_to_ona(client, msg_type, data)
             elif msg_type == "configuration":
                 use_hotword = payload.get("useHotword")
-                tts_engine = payload.get("ttsEngine") or "catotron"
+                tts_engine = payload.get("ttsEngine") or "festival"
                 tts_voice = payload.get("ttsVoice") or "ona"
                 client_config = self.clients.get(client.peer) or None
                 if client_config:
@@ -213,7 +213,7 @@ class OnaFactory(HiveMind):
                                      "audio_queue": audio_queue,
                                      "audio_listener": audio_listener,
                                      "use_hotword": True,
-                                     "tts_engine": "catotron",
+                                     "tts_engine": "festival",
                                      "tts_voice": "ona"}
         audio_listener.start()
 

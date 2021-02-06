@@ -10,8 +10,8 @@ const SettingsButton = styled(SettingOutlined)`
   box-sizing: border-box;
   padding: 0.2rem 0 0.2rem 0.5rem;
   > svg {
-    height: 3rem;
-    width: 3rem;
+    height: 2rem;
+    width: 2rem;
   }
   cursor: pointer;
 `;

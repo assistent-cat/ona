@@ -74,10 +74,10 @@ const hotwordOptions = [
 ];
 
 const ttsOptions = [
-  { label: "Ona (Catotron)", value: "ona-catotron" },
-  { label: "Pau (Catotron)", value: "pau-catotron" },
   { label: "Ona (Festival)", value: "ona-festival" },
   { label: "Pau (Festival)", value: "pau-festival" },
+  { label: "Ona (Catotron)", value: "ona-catotron" },
+  { label: "Pau (Catotron)", value: "pau-catotron" },
 ];
 
 interface Props {}
