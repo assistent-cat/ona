@@ -2,5 +2,4 @@ webrtcvad==2.0.10
 grpcio-tools
 git+https://github.com/assistent-cat/HiveMind-core.git@7b9c8cfa8ea1a62c0a1fe3a5fde34eb0fbc2e120
 git+https://github.com/JarbasLingua/jarbas-tts-plugin-catotron.git@b9b69b78b583625df1d3bc3e8e872b6ec69719ad
-git+https://github.com/ccoreilly/jarbas-stt-plugin-vosk.git@3f8ab706a44b3780fc6d695a20aeaf991f61788b
 precise-runner==0.3.1
