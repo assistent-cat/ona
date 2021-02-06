@@ -86,7 +86,7 @@ class WebsocketAudioSource(Thread):
         return s
     
     def get_tts_festival(self, utterance, voice, cached_file):
-        params = {"text": utterance, "token": self.getMD5(utterance), "type": "wav"}
+        params = {"text": utterance, "token": self.getMD5(utterance), "type": "wav", "voice": voice}
         audio_data = requests.get(self.festival_url, params=params).content
         
         with open(cached_file, "wb") as file:
