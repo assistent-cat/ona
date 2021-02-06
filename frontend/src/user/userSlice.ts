@@ -11,11 +11,11 @@ export interface UserState {
   sidebarOpen: boolean;
 }
 
-let initialState: UserState = {
+const initialState: UserState = {
   configuration: {
     useHotword: true,
     ttsEngine: "festival",
-    ttsVoice: "ona",
+    ttsVoice: /pau/.test(window.location.hostname) ? "pau" : "ona",
   },
   sidebarOpen: false,
 };

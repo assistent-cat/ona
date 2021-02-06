@@ -56,6 +56,7 @@ const WebSocketProvider = ({ children }: Props) => {
 
     socket.onopen = () => {
       console.log("Connection opened");
+      sendConfiguration();
     };
 
     socket.onclose = () => {
@@ -117,7 +118,7 @@ const WebSocketProvider = ({ children }: Props) => {
     (state) => state.user.configuration
   );
 
-  useEffect(() => {
+  const sendConfiguration = () => {
     if (socket && socket.readyState === 1) {
       socket.send(
         JSON.stringify({
@@ -126,7 +127,9 @@ const WebSocketProvider = ({ children }: Props) => {
         })
       );
     }
-  }, [configuration]);
+  };
+
+  useEffect(sendConfiguration, [configuration]);
 
   if (!socket) {
     init();
