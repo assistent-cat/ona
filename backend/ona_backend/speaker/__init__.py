@@ -70,7 +70,7 @@ class WebsocketAudioSource(Thread):
         combined = AudioSegment.empty()
         silence = AudioSegment.silent(duration=self.pause_between_chunks, frame_rate=22050)
         for sentence_chunk in CatotronTTSPlugin._split_sentences(utterance):
-            params = {"text": sentence_chunk}
+            params = {"text": sentence_chunk, "voice": voice}
             audio_data = requests.get(self.catotron_url, params=params).content
             combined += AudioSegment(data=audio_data, sample_width=2, frame_rate=22050, channels=1) + silence
 
