@@ -5,7 +5,7 @@ import { RootState } from "../rootReducer";
 import { createLoopback } from "./loopback";
 
 interface ISpeakerContext {
-  speak(data: Blob): Promise<void>;
+  addUtterance(data: Blob): Promise<void>;
   stop(): void;
   setVolume(vol: number): void;
   analyser: AnalyserNode;
@@ -14,7 +14,7 @@ interface ISpeakerContext {
 }
 
 const SpeakerContext = createContext<ISpeakerContext>({
-  speak: undefined,
+  addUtterance: undefined,
   stop: undefined,
   setVolume: undefined,
   analyser: undefined,
@@ -38,6 +38,8 @@ const SpeakerProvider = ({ children }: Props) => {
   let player: ISpeakerContext;
   const volume = useSelector<RootState, number>((state) => state.media.volume);
 
+  const utteranceQueue: Blob[] = [];
+  let playing = false;
   let initialised = false;
   const audioContext = getAudioContext();
   const analyser = audioContext.createAnalyser();
@@ -53,8 +55,17 @@ const SpeakerProvider = ({ children }: Props) => {
     initialised = true;
   };
 
+  const addUtterance = async (utterance: Blob) => {
+    if (!playing) {
+      playing = true;
+      await speak(utterance);
+    } else {
+      utteranceQueue.push(utterance);
+    }
+  };
+
   const speak = async (audioData: Blob) => {
-    const arrayBuffer = await audioData.arrayBuffer();
+    const arrayBuffer = await audioData?.arrayBuffer();
     if (arrayBuffer && arrayBuffer.byteLength > 0) {
       if (!initialised) {
         await init();
@@ -66,6 +77,11 @@ const SpeakerProvider = ({ children }: Props) => {
       source.connect(analyser).connect(destinationNode);
       source.start(nextStartTime);
       nextStartTime += audioBuffer.duration;
+
+      setTimeout(async () => {
+        playing = false;
+        await speak(utteranceQueue.shift());
+      }, audioBuffer.duration * 1000);
 
       onaSpeaker.muted = false;
       onaSpeaker.srcObject = loopbackStream;
@@ -90,7 +106,7 @@ const SpeakerProvider = ({ children }: Props) => {
   }, [volume, onaSpeaker]);
 
   player = {
-    speak,
+    addUtterance,
     stop,
     setVolume,
     analyser,

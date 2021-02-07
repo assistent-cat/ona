@@ -109,7 +109,7 @@ const WebSocketProvider = ({ children }: Props) => {
         }
       } else if (message.data instanceof Blob) {
         const audioData = message.data;
-        await player.speak(audioData);
+        await player.addUtterance(audioData);
       }
     };
   };
