@@ -13,6 +13,6 @@ configMapGenerator:
     disableNameSuffixHash: true
 - files:
   - identity2.json
-  name: mycroft-indentity2
+  name: mycroft-identity2
   options:
     disableNameSuffixHash: true
