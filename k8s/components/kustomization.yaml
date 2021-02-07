@@ -3,6 +3,7 @@ kind: Kustomization
 
 resources:
   - ./backend
+  - ./festival
   - ./frontend
   - ./catotron
   - ./vosk

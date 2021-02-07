@@ -15,12 +15,15 @@ services:
       - ./logs:/var/log/mycroft
       - ./backend:/opt/backend
       - ./backend/supervisord-dev.conf:/opt/mycroft/supervisord.conf
-      - venv:/opt/venv
+      - ./k8s/components/backend/mycroft.conf:/home/ona/.mycroft/mycroft.conf
+      - ./k8s/components/backend/identity2.json:/home/ona/.mycroft/identity/identity2.json
       - ./spoken:/tmp/catotron
       - ./mycroft-catala/mycroft-core/mycroft:/opt/mycroft/mycroft
   catotron:
     container_name: ona-catotron
-    image: assistent/catotron-cpu:0.0.1
+    image: assistent/catotron-cpu:0.0.2
+    environment:
+      LOAD_VOICE: both
     ports:
       - "9000:9000"
     entrypoint: python server.py
@@ -31,7 +34,8 @@ services:
       VOSK_SAMPLE_RATE: 16000
     ports:
       - "5001:5001"
-    volumes:
-      - ./vosk-server:/opt/vosk-server
-volumes:
-  venv:
+  festival:
+    container_name: ona-festival
+    image: assistent/festival-tts:0.0.1
+    ports:
+      - "8100:8100"

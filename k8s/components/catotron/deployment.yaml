@@ -25,6 +25,9 @@ spec:
         - name: ona-catotron
           image: assistent/catotron-cpu:0.0.1
           command: ["python", "server.py"]
+          env:
+            - name: LOAD_VOICE
+              value: both
           livenessProbe:
             httpGet:
               path: /

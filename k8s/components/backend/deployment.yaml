@@ -21,6 +21,13 @@ spec:
         app: ona-backend
         tier: backend
     spec:
+      volumes:
+        - name: mycroft-config-file
+          configMap:
+            name: mycroft-conf
+        - name: mycroft-identity2-file
+          configMap:
+            name: mycroft-identity2
       containers:
         - name: ona-backend
           image: assistent/ona-backend:0.0.2
@@ -29,6 +36,13 @@ spec:
               value: ona-vosk
             - name: CATOTRON_SERVER_HOST
               value: ona-catotron
+            - name: FESTIVAL_SERVER_HOST
+              value: ona-festival
+          volumeMounts:
+          - mountPath: /home/ona/.mycroft/
+            name: mycroft-config-file
+          - mountPath: /home/ona/.mycroft/identity/
+            name: mycroft-identity2-file
           livenessProbe:
             httpGet:
               path: /
