@@ -4,15 +4,4 @@ kind: Kustomization
 resources:
   - service.yaml
   - deployment.yaml
-  
-configMapGenerator:
-- files:
-  - mycroft.conf
-  name: mycroft-conf
-  options:
-    disableNameSuffixHash: true
-- files:
-  - identity2.json
-  name: mycroft-identity2
-  options:
-    disableNameSuffixHash: true
+  - pvc.yaml

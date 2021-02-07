@@ -23,7 +23,7 @@ class WebsocketAudioSource(Thread):
         self.catotron_url = f"http://{catotron_server_host}:{catotron_server_port}/synthesize"
         self.festival_url = f"http://{festival_server_host}:{festival_server_port}/speak/"
         self.queue = queue
-        self.cache = "/tmp/catotron"
+        self.cache = "/home/ona/spoken"
         self.sample_rate = 22050
         self.pause_between_chunks = 0.5
         if not isdir(self.cache):

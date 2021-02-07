@@ -16,3 +16,6 @@ nodes:
   - containerPort: 443
     hostPort: 443
     protocol: TCP
+  extraMounts:
+  - hostPath: ./shared
+    containerPath: /var/local-path-provisioner

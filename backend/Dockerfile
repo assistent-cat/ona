@@ -14,13 +14,13 @@ COPY --chown=ona ./ona_backend ./ona_backend
 COPY --chown=ona ./supervisord.conf /opt/mycroft/supervisord.conf
 COPY --chown=ona ./mycroft.conf /home/ona/.mycroft/mycroft.conf
 COPY --chown=ona ./lf_config_hack.py /opt/venv/lib/python3.8/site-packages/lingua_franca/config.py
-RUN mkdir -p /home/ona/.mycroft/identity && chown -R ona:ona /home/ona
 
 RUN wget https://github.com/MycroftAI/mycroft-precise/releases/download/v0.3.0/precise-engine_0.3.0_x86_64.tar.gz && tar xvf precise-engine_0.3.0_x86_64.tar.gz
 RUN wget https://github.com/MycroftAI/precise-data/raw/models/hey-mycroft.tar.gz && tar xvf hey-mycroft.tar.gz
 ENV PYTHONPATH="/opt/backend:${PYTHONPATH}"
 
 USER ona
+RUN mkdir -p /home/ona/log/mycroft/
 EXPOSE 5678
 
 WORKDIR /opt/mycroft

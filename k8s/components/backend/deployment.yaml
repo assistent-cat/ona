@@ -22,12 +22,9 @@ spec:
         tier: backend
     spec:
       volumes:
-        - name: mycroft-config-file
-          configMap:
-            name: mycroft-conf
-        - name: mycroft-identity2-file
-          configMap:
-            name: mycroft-identity2
+        - name: config-volume
+          persistentVolumeClaim:
+            claimName: ona-backend-pvc-config
       containers:
         - name: ona-backend
           image: assistent/ona-backend:0.0.3
@@ -39,10 +36,8 @@ spec:
             - name: FESTIVAL_SERVER_HOST
               value: ona-festival
           volumeMounts:
-          - mountPath: /home/ona/.mycroft/
-            name: mycroft-config-file
-          - mountPath: /home/ona/.mycroft/identity/
-            name: mycroft-identity2-file
+          - mountPath: /home/ona/
+            name: config-volume
           livenessProbe:
             httpGet:
               path: /
