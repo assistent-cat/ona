@@ -9,9 +9,10 @@ spec:
   tls:
     - hosts:
       - ona.assistent.cat
+      - pau.assistent.cat
       secretName: ona-certificate
   rules:
-  - host: ona.assistent.cat
+  - host: "*.assistent.cat"
     http:
       paths:
       - path: /
