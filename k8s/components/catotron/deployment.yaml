@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
         - name: ona-catotron
-          image: assistent/catotron-cpu:0.0.1
+          image: assistent/catotron-cpu:0.0.2
           command: ["python", "server.py"]
           env:
             - name: LOAD_VOICE
