@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
         - name: ona-frontend
-          image: assistent/ona-frontend:0.0.3
+          image: assistent/ona-frontend:0.0.4
           command: ["/app/start.sh"]
           env:
             - name: ONA_CONFIG_BACKEND_HOST

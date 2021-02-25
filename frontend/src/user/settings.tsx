@@ -70,7 +70,7 @@ const SettingsClose = styled(LeftOutlined)`
 
 const hotwordOptions = [
   { label: "Ei, Mycroft", value: true },
-  { label: "Desactivat", value: false },
+  { label: "Desactivada", value: false },
 ];
 
 const ttsOptions = [
