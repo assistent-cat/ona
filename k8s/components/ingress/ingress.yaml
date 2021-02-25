@@ -12,7 +12,18 @@ spec:
       - pau.assistent.cat
       secretName: ona-certificate
   rules:
-  - host: "*.assistent.cat"
+  - host: ona.assistent.cat
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: ona-frontend
+          servicePort: 80
+      - path: /ws/
+        backend:
+          serviceName: ona-backend
+          servicePort: 5678
+  - host: pau.assistent.cat
     http:
       paths:
       - path: /
