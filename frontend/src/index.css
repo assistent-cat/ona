@@ -22,3 +22,7 @@ code {
 .hidden-audio {
   display: none;
 }
+
+section {
+  margin-bottom: 1em;
+}
