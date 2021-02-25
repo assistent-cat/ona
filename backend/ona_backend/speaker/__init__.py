@@ -1,6 +1,7 @@
 import requests
 import os
 import json
+import re
 from threading import Thread
 from queue import Empty
 from pydub import AudioSegment
@@ -54,6 +55,8 @@ class WebsocketAudioSource(Thread):
         return join(self.cache, file_name) + ".wav"
         
     def get_tts(self, utterance, engine="festival", voice="pau"):
+        utterance = utterance.replace("’", "'")
+        utterance = re.sub("mycroft", "mai croft", utterance, flags=re.IGNORECASE)
         cached_file = self._get_unique_file_path(utterance, engine, voice)
         if isfile(cached_file):
             with open(cached_file, "rb") as file:
