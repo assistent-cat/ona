@@ -36,7 +36,7 @@ class WebsocketAudioSource(Thread):
             try:
                 (payload, client, tts_engine, tts_voice) = self.queue.get(timeout=0.5)
                 self.handle_speak_message(payload, client, tts_engine, tts_voice)
-            except Empty:
+            except Exception:
                 pass
 
     def handle_speak_message(self, payload, client, tts_engine, tts_voice):
@@ -46,7 +46,7 @@ class WebsocketAudioSource(Thread):
             client.sendMessage(audio_data, True)
         except Exception as e:
             LOG.error(f"Could not convert TTS due to {e}")
-            pass
+            return
         payload = json.dumps(payload)
         client.sendMessage(payload)
         

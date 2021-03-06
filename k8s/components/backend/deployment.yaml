@@ -27,7 +27,7 @@ spec:
             claimName: ona-backend-pvc-config
       containers:
         - name: ona-backend
-          image: assistent/ona-backend:0.0.4
+          image: assistent/ona-backend:0.0.5
           env:
             - name: VOSK_SERVER_HOST
               value: ona-vosk
